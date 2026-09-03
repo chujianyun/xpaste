@@ -20,13 +20,13 @@ enum ClipboardPayload: Equatable, Sendable {
     }
 }
 
-struct ImageMetadata: Equatable, Sendable {
+struct ImageMetadata: Codable, Equatable, Sendable {
     let width: Int
     let height: Int
     let relativePath: String
 }
 
-struct FileReference: Equatable, Sendable {
+struct FileReference: Codable, Equatable, Sendable {
     let path: String
     let displayName: String
     var bookmarkData: Data?
@@ -38,7 +38,7 @@ struct FileReference: Equatable, Sendable {
     }
 }
 
-struct ClipboardSource: Equatable, Sendable {
+struct ClipboardSource: Codable, Equatable, Sendable {
     let bundleIdentifier: String?
     let name: String
 }
@@ -71,4 +71,3 @@ struct ClipboardItem: Identifiable, Equatable, Sendable {
         lhs.id == rhs.id
     }
 }
-
