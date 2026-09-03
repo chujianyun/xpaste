@@ -14,6 +14,7 @@ final class AppModel {
     private let settingsPersistence = SettingsPersistence()
     private let loginItem = LoginItemClient()
     private let linkPreviewService = LinkPreviewService()
+    private let onboardingWindow = OnboardingWindowController()
     private var pasteTarget: ApplicationTargeting?
 
     init(settings: AppSettings? = nil) {
@@ -28,6 +29,7 @@ final class AppModel {
             )
         }
         monitor?.start()
+        onboardingWindow.showIfNeeded()
         shortcutManager.onAction = { [weak self] action in
             switch action {
             case .showHistory: self?.showHistory()

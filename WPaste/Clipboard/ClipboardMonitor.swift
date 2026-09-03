@@ -61,7 +61,6 @@ final class ClipboardMonitor {
         if suppression?.until ?? .distantFuture < now {
             suppression = nil
         }
-        try repository.upsert(payload: parsed.payload, fingerprint: fingerprint, source: parsed.source, at: now)
+        try repository.upsert(candidate: parsed, fingerprint: fingerprint, at: now)
     }
 }
-

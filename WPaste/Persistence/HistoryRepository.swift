@@ -5,8 +5,18 @@ import SwiftData
 final class HistoryRepository {
     private let container: ModelContainer
     private let context: ModelContext
+    private let imageFileStore: ImageFileStore?
 
-    init(inMemory: Bool = false) throws {
+    init(inMemory: Bool = false, imageFileStore: ImageFileStore? = nil) throws {
+        if let imageFileStore {
+            self.imageFileStore = imageFileStore
+        } else if inMemory {
+            self.imageFileStore = nil
+        } else {
+            let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appending(path: "WPaste", directoryHint: .isDirectory)
+            self.imageFileStore = ImageFileStore(rootDirectory: root)
+        }
         let configuration = ModelConfiguration(isStoredInMemoryOnly: inMemory)
         container = try ModelContainer(
             for: HistoryRecord.self,
@@ -19,8 +29,8 @@ final class HistoryRepository {
         context.autosaveEnabled = false
     }
 
-    static func inMemory() throws -> HistoryRepository {
-        try HistoryRepository(inMemory: true)
+    static func inMemory(imageFileStore: ImageFileStore? = nil) throws -> HistoryRepository {
+        try HistoryRepository(inMemory: true, imageFileStore: imageFileStore)
     }
 
     @discardableResult
@@ -63,19 +73,51 @@ final class HistoryRepository {
         return try context.fetch(descriptor).compactMap { try? $0.domainItem() }
     }
 
+    @discardableResult
+    func upsert(candidate: ParsedClipboard, fingerprint: String, at date: Date = .now) throws -> ClipboardItem {
+        var payload = candidate.payload
+        var newlySavedPath: String?
+        let existingDescriptor = FetchDescriptor<HistoryRecord>(predicate: #Predicate { $0.fingerprint == fingerprint })
+        let previousImagePath = try context.fetch(existingDescriptor).first?.imageRelativePath
+        if case let .image(metadata) = candidate.payload,
+           let data = candidate.imageData,
+           let imageFileStore {
+            let relativePath = try imageFileStore.save(data, fileExtension: "png")
+            newlySavedPath = relativePath
+            payload = .image(.init(width: metadata.width, height: metadata.height, relativePath: relativePath))
+        }
+        do {
+            let item = try upsert(payload: payload, fingerprint: fingerprint, source: candidate.source, at: date)
+            if let previousImagePath, previousImagePath != newlySavedPath {
+                try imageFileStore?.delete(relativePath: previousImagePath)
+            }
+            return item
+        } catch {
+            if let newlySavedPath { try? imageFileStore?.delete(relativePath: newlySavedPath) }
+            throw error
+        }
+    }
+
     func delete(id: UUID) throws {
         let descriptor = FetchDescriptor<HistoryRecord>(predicate: #Predicate { $0.id == id })
-        try context.fetch(descriptor).forEach(context.delete)
+        let records = try context.fetch(descriptor)
+        let imagePaths = records.compactMap(\.imageRelativePath)
+        records.forEach(context.delete)
         let memberships = FetchDescriptor<PinboardItemRecord>(predicate: #Predicate { $0.itemID == id })
         try context.fetch(memberships).forEach(context.delete)
         let stackEntries = FetchDescriptor<StackEntryRecord>(predicate: #Predicate { $0.itemID == id })
         try context.fetch(stackEntries).forEach(context.delete)
         try context.save()
+        for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
     }
 
     func clear() throws {
+        let imagePaths = try context.fetch(FetchDescriptor<HistoryRecord>()).compactMap(\.imageRelativePath)
         try context.delete(model: HistoryRecord.self)
+        try context.delete(model: PinboardItemRecord.self)
+        try context.delete(model: StackEntryRecord.self)
         try context.save()
+        for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
     }
 
     @discardableResult
@@ -84,8 +126,17 @@ final class HistoryRepository {
         let cutoff = now.addingTimeInterval(-interval)
         let descriptor = FetchDescriptor<HistoryRecord>(predicate: #Predicate { $0.lastUsedAt < cutoff })
         let expired = try context.fetch(descriptor)
+        let expiredIDs = Set(expired.map(\.id))
+        let imagePaths = expired.compactMap(\.imageRelativePath)
         expired.forEach(context.delete)
+        for membership in try context.fetch(FetchDescriptor<PinboardItemRecord>()) where expiredIDs.contains(membership.itemID) {
+            context.delete(membership)
+        }
+        for entry in try context.fetch(FetchDescriptor<StackEntryRecord>()) where expiredIDs.contains(entry.itemID) {
+            context.delete(entry)
+        }
         try context.save()
+        for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
         return expired.count
     }
 
