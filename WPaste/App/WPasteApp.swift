@@ -22,17 +22,14 @@ struct WPasteApp: App {
             }
             Divider()
             SettingsLink { Text("设置…") }
-            Button("退出 WPaste") { NSApplication.shared.terminate(nil) }
+            Button("退出 WPaste") {
+                model.stop()
+                NSApplication.shared.terminate(nil)
+            }
         }
 
         Settings {
-            Form {
-                Toggle("音效", isOn: $model.settings.soundEnabled)
-                Text("更多设置将在后续增量中提供。")
-                    .foregroundStyle(.secondary)
-            }
-            .padding()
-            .frame(width: 480)
+            SettingsView(model: model)
         }
     }
 }

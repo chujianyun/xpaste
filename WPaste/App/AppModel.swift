@@ -11,10 +11,13 @@ final class AppModel {
     private let overlay = OverlayWindowController()
     private let shortcutManager = ShortcutManager()
     private let frontmostApplication = FrontmostApplicationClient()
+    private let settingsPersistence = SettingsPersistence()
+    private let loginItem = LoginItemClient()
+    private let linkPreviewService = LinkPreviewService()
     private var pasteTarget: ApplicationTargeting?
 
-    init(settings: AppSettings = .default) {
-        self.settings = settings
+    init(settings: AppSettings? = nil) {
+        self.settings = settings ?? SettingsPersistence().load()
         repository = try? HistoryRepository()
         monitor = nil
         if let repository {
@@ -40,6 +43,54 @@ final class AppModel {
 
     func stop() {
         monitor?.stop()
+        if settings.clearHistoryOnQuit { clearHistory() }
+    }
+
+    func persistSettings() {
+        do {
+            try settingsPersistence.save(settings)
+            if loginItem.isEnabled != settings.launchAtLogin {
+                try loginItem.setEnabled(settings.launchAtLogin)
+            }
+        } catch {
+            userNotice = "设置保存失败：\(error.localizedDescription)"
+        }
+    }
+
+    func clearHistory() {
+        do { try repository?.clear() } catch { userNotice = "历史删除失败：\(error.localizedDescription)" }
+    }
+
+    func clearPreviewCache() {
+        linkPreviewService.clearCache()
+        userNotice = "预览缓存已清理"
+    }
+
+    func resetShortcuts() {
+        shortcutManager.resetDefaults()
+    }
+
+    func shortcutDescription(_ action: ShortcutAction) -> String {
+        guard let shortcut = shortcutManager.shortcuts[action] else { return "—" }
+        var result = ""
+        if shortcut.modifiers.contains(.control) { result += "⌃" }
+        if shortcut.modifiers.contains(.option) { result += "⌥" }
+        if shortcut.modifiers.contains(.shift) { result += "⇧" }
+        if shortcut.modifiers.contains(.command) { result += "⌘" }
+        result += keyName(shortcut.keyCode)
+        return result
+    }
+
+    private func keyName(_ keyCode: UInt32) -> String {
+        switch keyCode {
+        case 8: "C"
+        case 9: "V"
+        case 18: "1…9"
+        case 56: "Shift"
+        case 123: "←"
+        case 124: "→"
+        default: "\(keyCode)"
+        }
     }
 
     func showHistory() {

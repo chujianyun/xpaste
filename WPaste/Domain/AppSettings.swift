@@ -13,7 +13,7 @@ enum DefaultPasteBehavior: String, Codable, Sendable {
     case copyOnly
 }
 
-struct AppSettings: Equatable, Sendable {
+struct AppSettings: Codable, Equatable, Sendable {
     var launchAtLogin: Bool
     var soundEnabled: Bool
     var defaultPasteBehavior: DefaultPasteBehavior
@@ -42,4 +42,3 @@ struct AppSettings: Equatable, Sendable {
         recordingPaused: false
     )
 }
-
