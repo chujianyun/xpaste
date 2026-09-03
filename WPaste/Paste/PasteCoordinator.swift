@@ -89,7 +89,10 @@ final class PasteCoordinator {
         guard pasteboard.write(item.payload, asPlainText: mode.plainText) else { return .unavailable }
         closeOverlay()
         guard case .automatic = mode else { return .copied }
-        guard accessibility.isTrusted else { return .copiedOnly(.accessibilityPermissionMissing) }
+        guard accessibility.isTrusted else {
+            accessibility.requestPermission()
+            return .copiedOnly(.accessibilityPermissionMissing)
+        }
         guard let target, target.isRunning else { return .copiedOnly(.targetUnavailable) }
         guard target.activate() else { return .copiedOnly(.activationFailed) }
         guard accessibility.sendPasteCommand() else { return .copiedOnly(.keyEventFailed) }
@@ -107,4 +110,3 @@ private extension ClipboardPayload {
         }
     }
 }
-

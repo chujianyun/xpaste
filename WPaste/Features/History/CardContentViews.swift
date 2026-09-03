@@ -20,6 +20,8 @@ struct TextCardContent: View {
 
 struct URLCardContent: View {
     let url: URL
+    let previewsEnabled: Bool
+    @State private var preview: LinkPreview?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -27,7 +29,7 @@ struct URLCardContent: View {
                 .font(.system(size: 38))
                 .foregroundStyle(.blue)
                 .frame(maxWidth: .infinity)
-            Text(url.host() ?? url.absoluteString)
+            Text(preview?.title ?? url.host() ?? url.absoluteString)
                 .font(.headline)
             Text(url.absoluteString)
                 .font(.caption)
@@ -35,6 +37,9 @@ struct URLCardContent: View {
                 .lineLimit(3)
         }
         .frame(maxHeight: .infinity, alignment: .top)
+        .task(id: url) {
+            preview = await LinkPreviewService().preview(for: url, enabled: previewsEnabled)
+        }
     }
 }
 
@@ -84,4 +89,3 @@ struct FilesCardContent: View {
         }
     }
 }
-

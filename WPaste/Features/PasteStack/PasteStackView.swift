@@ -21,6 +21,15 @@ struct PasteStackView: View {
                 HStack(spacing: 16) {
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         ClipboardCardView(item: item, index: index, isSelected: index == 0)
+                            .draggable(item.id.uuidString)
+                            .dropDestination(for: String.self) { identifiers, _ in
+                                guard let value = identifiers.first,
+                                      let id = UUID(uuidString: value),
+                                      let source = items.firstIndex(where: { $0.id == id }) else { return false }
+                                try? store.move(from: source, to: index)
+                                reload()
+                                return true
+                            }
                             .contextMenu {
                                 Button("粘贴下一项") { onPasteNext(item) }
                                 Button("移除", role: .destructive) { try? store.remove(item.id); reload() }
@@ -45,4 +54,3 @@ struct PasteStackView: View {
         items = (try? store.items()) ?? []
     }
 }
-

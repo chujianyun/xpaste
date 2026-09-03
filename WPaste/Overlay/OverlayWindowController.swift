@@ -13,10 +13,11 @@ final class OverlayWindowController: NSObject, NSWindowDelegate {
 
     var isVisible: Bool { panel?.isVisible == true }
 
-    func show<Content: View>(@ViewBuilder content: () -> Content) {
+    func show<Content: View>(hideFromScreenCapture: Bool = false, @ViewBuilder content: () -> Content) {
         let screen = screenAtMouse() ?? NSScreen.main
         guard let screen else { return }
         let panel = panel ?? makePanel()
+        panel.sharingType = hideFromScreenCapture ? .none : .readOnly
         panel.contentViewController = NSHostingController(rootView: content())
         panel.setFrame(OverlayPlacement.frame(in: screen.visibleFrame, height: 332), display: true)
         panel.makeKeyAndOrderFront(nil)
@@ -58,4 +59,3 @@ private final class KeyablePanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 }
-

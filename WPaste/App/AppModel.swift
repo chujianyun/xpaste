@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 
@@ -10,12 +11,14 @@ final class AppModel {
     private(set) var monitor: ClipboardMonitor?
     private let overlay = OverlayWindowController()
     private let shortcutManager = ShortcutManager()
+    private let shortcutPersistence = ShortcutPersistence()
     private let frontmostApplication = FrontmostApplicationClient()
     private let settingsPersistence = SettingsPersistence()
     private let loginItem = LoginItemClient()
     private let linkPreviewService = LinkPreviewService()
     private let onboardingWindow = OnboardingWindowController()
     private var pasteTarget: ApplicationTargeting?
+    private var maintenanceTask: Task<Void, Never>?
 
     init(settings: AppSettings? = nil) {
         self.settings = settings ?? SettingsPersistence().load()
@@ -29,7 +32,11 @@ final class AppModel {
             )
         }
         monitor?.start()
+        startMaintenance()
         onboardingWindow.showIfNeeded()
+        for (action, shortcut) in shortcutPersistence.load() {
+            _ = shortcutManager.update(action, to: shortcut)
+        }
         shortcutManager.onAction = { [weak self] action in
             switch action {
             case .showHistory: self?.showHistory()
@@ -45,6 +52,8 @@ final class AppModel {
 
     func stop() {
         monitor?.stop()
+        maintenanceTask?.cancel()
+        maintenanceTask = nil
         if settings.clearHistoryOnQuit { clearHistory() }
     }
 
@@ -70,6 +79,19 @@ final class AppModel {
 
     func resetShortcuts() {
         shortcutManager.resetDefaults()
+        try? shortcutPersistence.save(shortcutManager.shortcuts)
+    }
+
+    func updateShortcut(_ action: ShortcutAction, to shortcut: Shortcut) {
+        switch shortcutManager.update(action, to: shortcut) {
+        case .success:
+            try? shortcutPersistence.save(shortcutManager.shortcuts)
+            userNotice = nil
+        case let .internalConflict(conflict):
+            userNotice = "快捷键与 \(conflict.rawValue) 冲突"
+        case .registrationFailed:
+            userNotice = "系统无法注册该快捷键，已保留原设置"
+        }
     }
 
     func shortcutDescription(_ action: ShortcutAction) -> String {
@@ -104,11 +126,13 @@ final class AppModel {
         let history = HistoryStore(repository: repository)
         let pinboards = PinboardStore(repository: repository)
         let stack = PasteStackStore(repository: repository)
-        overlay.show { [weak self] in
+        let linkPreviewsEnabled = settings.linkPreviewsEnabled
+        overlay.show(hideFromScreenCapture: settings.hideDuringScreenSharing) { [weak self] in
             HistoryOverlayView(
                 history: history,
                 pinboards: pinboards,
                 stack: stack,
+                linkPreviewsEnabled: linkPreviewsEnabled,
                 onPaste: { item, plainText in self?.paste(item, plainText: plainText, stack: nil) },
                 onClose: { self?.overlay.hide() }
             )
@@ -119,7 +143,7 @@ final class AppModel {
         guard let repository else { return }
         pasteTarget = frontmostApplication.capture()
         let stack = PasteStackStore(repository: repository)
-        overlay.show { [weak self] in
+        overlay.show(hideFromScreenCapture: settings.hideDuringScreenSharing) { [weak self] in
             PasteStackView(
                 store: stack,
                 onPasteNext: { item in self?.paste(item, plainText: false, stack: stack) },
@@ -141,6 +165,9 @@ final class AppModel {
             ? .automatic(plainText: plainText || settings.defaultPlainText)
             : .copyOnly(plainText: plainText || settings.defaultPlainText)
         let result = coordinator.paste(item: item, mode: mode, target: pasteTarget)
+        if settings.soundEnabled, result == .pasted || result == .copied {
+            NSSound(named: "Tink")?.play()
+        }
         try? stack?.completeFirst(successfullyPasted: result == .pasted)
         switch result {
         case .pasted: userNotice = nil
@@ -156,6 +183,17 @@ final class AppModel {
         case .targetUnavailable: "原应用已退出；内容已复制到剪贴板"
         case .activationFailed: "无法恢复原应用；内容已复制到剪贴板"
         case .keyEventFailed: "无法发送粘贴按键；内容已复制到剪贴板"
+        }
+    }
+
+    private func startMaintenance() {
+        _ = try? repository?.cleanExpired(retention: settings.retention)
+        maintenanceTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(3_600))
+                guard let self else { return }
+                _ = try? repository?.cleanExpired(retention: settings.retention)
+            }
         }
     }
 }

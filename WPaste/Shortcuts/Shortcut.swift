@@ -1,6 +1,6 @@
 import Foundation
 
-struct ShortcutModifiers: OptionSet, Hashable, Sendable {
+struct ShortcutModifiers: Codable, OptionSet, Hashable, Sendable {
     let rawValue: UInt32
 
     static let command = ShortcutModifiers(rawValue: 1 << 0)
@@ -9,12 +9,12 @@ struct ShortcutModifiers: OptionSet, Hashable, Sendable {
     static let shift = ShortcutModifiers(rawValue: 1 << 3)
 }
 
-struct Shortcut: Hashable, Sendable {
+struct Shortcut: Codable, Hashable, Sendable {
     let keyCode: UInt32
     let modifiers: ShortcutModifiers
 }
 
-enum ShortcutAction: String, CaseIterable, Hashable, Sendable {
+enum ShortcutAction: String, CaseIterable, Codable, Hashable, Sendable {
     case showHistory
     case showPasteStack
     case nextPinboard
@@ -28,4 +28,3 @@ enum ShortcutUpdateResult: Equatable {
     case internalConflict(ShortcutAction)
     case registrationFailed
 }
-

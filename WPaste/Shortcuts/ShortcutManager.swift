@@ -28,7 +28,7 @@ final class ShortcutManager {
     init(registrar: ShortcutRegistering = CarbonShortcutRegistrar()) {
         self.registrar = registrar
         shortcuts = Self.defaultShortcuts
-        for (action, shortcut) in shortcuts {
+        for (action, shortcut) in shortcuts where action.requiresGlobalRegistration {
             _ = registrar.register(shortcut, action: action)
         }
         notificationToken = NotificationCenter.default.addObserver(
@@ -48,16 +48,28 @@ final class ShortcutManager {
         if let conflict = shortcuts.first(where: { $0.key != action && $0.value == shortcut })?.key {
             return .internalConflict(conflict)
         }
-        guard registrar.register(shortcut, action: action) else { return .registrationFailed }
-        if let old = shortcuts[action] { registrar.unregister(old) }
+        if action.requiresGlobalRegistration {
+            guard registrar.register(shortcut, action: action) else { return .registrationFailed }
+            if let old = shortcuts[action] { registrar.unregister(old) }
+        }
         shortcuts[action] = shortcut
         return .success
     }
 
     func resetDefaults() {
-        shortcuts.values.forEach(registrar.unregister)
+        for (action, shortcut) in shortcuts where action.requiresGlobalRegistration {
+            registrar.unregister(shortcut)
+        }
         shortcuts = Self.defaultShortcuts
-        for (action, shortcut) in shortcuts { _ = registrar.register(shortcut, action: action) }
+        for (action, shortcut) in shortcuts where action.requiresGlobalRegistration {
+            _ = registrar.register(shortcut, action: action)
+        }
+    }
+}
+
+private extension ShortcutAction {
+    var requiresGlobalRegistration: Bool {
+        self == .showHistory || self == .showPasteStack
     }
 }
 

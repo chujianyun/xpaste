@@ -4,7 +4,12 @@ struct ClipboardParser: Sendable {
     func parse(_ snapshot: PasteboardSnapshot) -> ParsedClipboard? {
         if !snapshot.fileURLs.isEmpty {
             let files = snapshot.fileURLs.map {
-                FileReference(path: $0.path, displayName: $0.lastPathComponent)
+                let bookmark = try? $0.bookmarkData(
+                    options: .withSecurityScope,
+                    includingResourceValuesForKeys: nil,
+                    relativeTo: nil
+                )
+                return FileReference(path: $0.path, displayName: $0.lastPathComponent, bookmarkData: bookmark)
             }
             return ParsedClipboard(payload: .files(files), source: snapshot.source, declaredTypes: snapshot.declaredTypes)
         }
@@ -41,4 +46,3 @@ struct ClipboardParser: Sendable {
         return components.url
     }
 }
-

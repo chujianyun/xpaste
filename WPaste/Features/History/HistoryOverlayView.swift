@@ -4,11 +4,16 @@ struct HistoryOverlayView: View {
     @Bindable var history: HistoryStore
     @Bindable var pinboards: PinboardStore
     let stack: PasteStackStore
+    var linkPreviewsEnabled = true
     let onPaste: (ClipboardItem, Bool) -> Void
     let onClose: () -> Void
 
     @State private var navigation = OverlayNavigation(itemCount: 0)
     @State private var selectedPinboardID: UUID?
+    @State private var showingNewPinboard = false
+    @State private var newPinboardName = ""
+    @State private var boardBeingRenamed: Pinboard?
+    @State private var renamedBoardName = ""
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -18,7 +23,12 @@ struct HistoryOverlayView: View {
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 18) {
                         ForEach(Array(displayedItems.enumerated()), id: \.element.id) { index, item in
-                            ClipboardCardView(item: item, index: index, isSelected: navigation.selectedIndex == index)
+                            ClipboardCardView(
+                                item: item,
+                                index: index,
+                                isSelected: navigation.selectedIndex == index,
+                                linkPreviewsEnabled: linkPreviewsEnabled
+                            )
                                 .id(item.id)
                                 .onTapGesture { navigation.select(index); onPaste(item, false) }
                                 .contextMenu { contextMenu(for: item) }
@@ -43,6 +53,33 @@ struct HistoryOverlayView: View {
         .onKeyPress(.rightArrow) { navigation.moveNext(); return .handled }
         .onKeyPress(.return) { pasteSelection(plainText: false); return .handled }
         .onKeyPress(.escape) { onClose(); return .handled }
+        .onKeyPress(phases: .down) { press in
+            guard press.modifiers.contains(.command), let position = Int(press.characters),
+                  let index = navigation.selectQuickPosition(position), displayedItems.indices.contains(index) else {
+                return .ignored
+            }
+            onPaste(displayedItems[index], false)
+            return .handled
+        }
+        .alert("新建 Pinboard", isPresented: $showingNewPinboard) {
+            TextField("名称", text: $newPinboardName)
+            Button("取消", role: .cancel) {}
+            Button("创建") {
+                _ = try? pinboards.create(name: newPinboardName)
+                newPinboardName = ""
+            }
+        }
+        .alert("重命名 Pinboard", isPresented: Binding(
+            get: { boardBeingRenamed != nil },
+            set: { if !$0 { boardBeingRenamed = nil } }
+        )) {
+            TextField("名称", text: $renamedBoardName)
+            Button("取消", role: .cancel) { boardBeingRenamed = nil }
+            Button("保存") {
+                if let board = boardBeingRenamed { try? pinboards.rename(id: board.id, name: renamedBoardName) }
+                boardBeingRenamed = nil
+            }
+        }
     }
 
     private var navigationBar: some View {
@@ -53,7 +90,7 @@ struct HistoryOverlayView: View {
                 .frame(width: 220)
             boardButton(title: "剪贴板历史", id: nil)
             ForEach(pinboards.pinboards) { board in boardButton(title: board.name, id: board.id) }
-            Button { _ = try? pinboards.create(name: "新 Pinboard") } label: { Image(systemName: "plus") }
+            Button { showingNewPinboard = true } label: { Image(systemName: "plus") }
                 .buttonStyle(.plain)
             Spacer()
         }
@@ -67,6 +104,23 @@ struct HistoryOverlayView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(selectedPinboardID == id ? Color.primary.opacity(0.1) : .clear, in: Capsule())
+            .contextMenu {
+                if let id, let index = pinboards.pinboards.firstIndex(where: { $0.id == id }) {
+                    Button("重命名") {
+                        boardBeingRenamed = pinboards.pinboards[index]
+                        renamedBoardName = title
+                    }
+                    Button("向左移动") { try? pinboards.move(id: id, to: max(0, index - 1)) }
+                        .disabled(index == 0)
+                    Button("向右移动") { try? pinboards.move(id: id, to: min(pinboards.pinboards.count - 1, index + 1)) }
+                        .disabled(index == pinboards.pinboards.count - 1)
+                    Divider()
+                    Button("删除 Pinboard", role: .destructive) {
+                        try? pinboards.delete(id: id)
+                        selectedPinboardID = nil
+                    }
+                }
+            }
     }
 
     @ViewBuilder
@@ -99,4 +153,3 @@ struct HistoryOverlayView: View {
         onPaste(displayedItems[index], plainText)
     }
 }
-

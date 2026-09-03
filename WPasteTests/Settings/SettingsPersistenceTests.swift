@@ -31,6 +31,14 @@ struct SettingsPersistenceTests {
         #expect(store.isRequired == false)
     }
 
+    @Test func shortcutOverridesRoundTrip() throws {
+        let defaults = isolatedDefaults()
+        let store = ShortcutPersistence(defaults: defaults)
+        let shortcut = Shortcut(keyCode: 42, modifiers: [.command, .option])
+        try store.save([.showHistory: shortcut])
+        #expect(store.load() == [.showHistory: shortcut])
+    }
+
     private func isolatedDefaults() -> UserDefaults {
         let suite = "WPasteTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
@@ -38,4 +46,3 @@ struct SettingsPersistenceTests {
         return defaults
     }
 }
-

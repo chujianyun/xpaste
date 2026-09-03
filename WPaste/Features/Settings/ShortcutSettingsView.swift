@@ -26,12 +26,9 @@ struct ShortcutSettingsView: View {
         HStack {
             Text(title)
             Spacer()
-            Text(model.shortcutDescription(action))
-                .font(.body.monospaced())
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 7))
+            ShortcutRecorderButton(current: model.shortcutDescription(action)) { shortcut in
+                model.updateShortcut(action, to: shortcut)
+            }
         }
     }
 }
-

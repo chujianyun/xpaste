@@ -29,6 +29,11 @@ final class PinboardStore {
         try reload()
     }
 
+    func move(id: UUID, to destination: Int) throws {
+        try repository.movePinboard(id: id, to: destination)
+        try reload()
+    }
+
     func add(itemID: UUID, to pinboardID: UUID) throws {
         try repository.add(itemID: itemID, toPinboard: pinboardID)
     }
@@ -41,4 +46,3 @@ final class PinboardStore {
         pinboards = try repository.pinboards()
     }
 }
-

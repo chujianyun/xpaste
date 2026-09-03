@@ -51,5 +51,17 @@ struct FeatureStoreTests {
         try stack.completeFirst(successfullyPasted: true)
         #expect(try stack.items().map(\.id) == [first.id])
     }
-}
 
+    @Test func pinboardsCanBeRenamedAndReordered() throws {
+        let repository = try HistoryRepository.inMemory()
+        let store = PinboardStore(repository: repository)
+        let first = try store.create(name: "第一")
+        _ = try store.create(name: "第二")
+        let third = try store.create(name: "第三")
+
+        try store.rename(id: first.id, name: "已重命名")
+        try store.move(id: third.id, to: 0)
+
+        #expect(store.pinboards.map(\.name) == ["第三", "已重命名", "第二"])
+    }
+}

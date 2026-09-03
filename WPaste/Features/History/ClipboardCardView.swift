@@ -4,6 +4,7 @@ struct ClipboardCardView: View {
     let item: ClipboardItem
     let index: Int
     let isSelected: Bool
+    var linkPreviewsEnabled = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +28,7 @@ struct ClipboardCardView: View {
             Group {
                 switch item.payload {
                 case let .text(text): TextCardContent(text: text)
-                case let .url(url): URLCardContent(url: url)
+                case let .url(url): URLCardContent(url: url, previewsEnabled: linkPreviewsEnabled)
                 case let .image(metadata): ImageCardContent(metadata: metadata)
                 case let .files(files): FilesCardContent(files: files)
                 }
@@ -68,4 +69,3 @@ struct ClipboardCardView: View {
         }
     }
 }
-

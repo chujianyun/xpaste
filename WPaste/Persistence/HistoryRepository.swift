@@ -168,6 +168,17 @@ final class HistoryRepository {
         try context.save()
     }
 
+    func movePinboard(id: UUID, to destination: Int) throws {
+        let descriptor = FetchDescriptor<PinboardRecord>(sortBy: [SortDescriptor(\.order)])
+        var records = try context.fetch(descriptor)
+        guard let source = records.firstIndex(where: { $0.id == id }),
+              destination >= 0, destination < records.count else { return }
+        let moved = records.remove(at: source)
+        records.insert(moved, at: destination)
+        for (index, record) in records.enumerated() { record.order = index }
+        try context.save()
+    }
+
     func add(itemID: UUID, toPinboard pinboardID: UUID) throws {
         let descriptor = FetchDescriptor<PinboardItemRecord>(predicate: #Predicate {
             $0.itemID == itemID && $0.pinboardID == pinboardID

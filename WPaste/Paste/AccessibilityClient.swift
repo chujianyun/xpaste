@@ -1,15 +1,25 @@
-import ApplicationServices
+@preconcurrency import ApplicationServices
 import Foundation
 
 @MainActor
 protocol AccessibilityControlling {
     var isTrusted: Bool { get }
+    func requestPermission()
     func sendPasteCommand() -> Bool
+}
+
+extension AccessibilityControlling {
+    func requestPermission() {}
 }
 
 @MainActor
 struct SystemAccessibilityClient: AccessibilityControlling {
     var isTrusted: Bool { AXIsProcessTrusted() }
+
+    func requestPermission() {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
+    }
 
     func sendPasteCommand() -> Bool {
         guard isTrusted,
@@ -23,4 +33,3 @@ struct SystemAccessibilityClient: AccessibilityControlling {
         return true
     }
 }
-
