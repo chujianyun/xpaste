@@ -21,13 +21,26 @@ final class ShortcutManager {
     ]
 
     private(set) var shortcuts: [ShortcutAction: Shortcut]
+    var onAction: ((ShortcutAction) -> Void)?
     private let registrar: ShortcutRegistering
+    private var notificationToken: NSObjectProtocol?
 
     init(registrar: ShortcutRegistering = CarbonShortcutRegistrar()) {
         self.registrar = registrar
         shortcuts = Self.defaultShortcuts
         for (action, shortcut) in shortcuts {
             _ = registrar.register(shortcut, action: action)
+        }
+        notificationToken = NotificationCenter.default.addObserver(
+            forName: .wpasteShortcut,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let rawValue = notification.object as? UInt32,
+                  rawValue > 0,
+                  ShortcutAction.allCases.indices.contains(Int(rawValue - 1)) else { return }
+            let action = ShortcutAction.allCases[Int(rawValue - 1)]
+            MainActor.assumeIsolated { self?.onAction?(action) }
         }
     }
 
@@ -51,6 +64,37 @@ final class ShortcutManager {
 @MainActor
 final class CarbonShortcutRegistrar: ShortcutRegistering {
     private var references: [Shortcut: EventHotKeyRef] = [:]
+    private var eventHandler: EventHandlerRef?
+
+    init() {
+        var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: OSType(kEventHotKeyPressed))
+        InstallEventHandler(
+            GetApplicationEventTarget(),
+            { _, event, _ in
+                guard let event else { return OSStatus(eventNotHandledErr) }
+                var identifier = EventHotKeyID()
+                var size = MemoryLayout<EventHotKeyID>.size
+                let status = GetEventParameter(
+                    event,
+                    EventParamName(kEventParamDirectObject),
+                    EventParamType(typeEventHotKeyID),
+                    nil,
+                    MemoryLayout<EventHotKeyID>.size,
+                    &size,
+                    &identifier
+                )
+                guard status == noErr else { return status }
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .wpasteShortcut, object: identifier.id)
+                }
+                return noErr
+            },
+            1,
+            &eventType,
+            nil,
+            &eventHandler
+        )
+    }
 
     func register(_ shortcut: Shortcut, action: ShortcutAction) -> Bool {
         var reference: EventHotKeyRef?
@@ -77,6 +121,10 @@ final class CarbonShortcutRegistrar: ShortcutRegistering {
     }
 }
 
+private extension Notification.Name {
+    static let wpasteShortcut = Notification.Name("WPasteShortcutPressed")
+}
+
 private extension ShortcutModifiers {
     var carbonFlags: UInt32 {
         var flags: UInt32 = 0
@@ -87,4 +135,3 @@ private extension ShortcutModifiers {
         return flags
     }
 }
-
