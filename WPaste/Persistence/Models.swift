@@ -92,3 +92,47 @@ enum PersistenceError: Error, Equatable {
     case corruptRecord
 }
 
+@Model
+final class PinboardRecord {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var order: Int
+
+    init(id: UUID = UUID(), name: String, order: Int) {
+        self.id = id
+        self.name = name
+        self.order = order
+    }
+}
+
+@Model
+final class PinboardItemRecord {
+    @Attribute(.unique) var id: UUID
+    var pinboardID: UUID
+    var itemID: UUID
+
+    init(id: UUID = UUID(), pinboardID: UUID, itemID: UUID) {
+        self.id = id
+        self.pinboardID = pinboardID
+        self.itemID = itemID
+    }
+}
+
+@Model
+final class StackEntryRecord {
+    @Attribute(.unique) var id: UUID
+    var itemID: UUID
+    var order: Int
+
+    init(id: UUID = UUID(), itemID: UUID, order: Int) {
+        self.id = id
+        self.itemID = itemID
+        self.order = order
+    }
+}
+
+struct Pinboard: Identifiable, Equatable, Sendable {
+    let id: UUID
+    var name: String
+    var order: Int
+}
