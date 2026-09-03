@@ -8,7 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		0CD97FA471CEC05CC9C2DDD7 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA09DA27067536467BF3A0B /* AppSettings.swift */; };
+		129F5E0BE57787E365BD78EC /* PasteboardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88B7F3451D99AFF4119323A7 /* PasteboardSnapshot.swift */; };
+		2383FE8196B096A73E56B1CE /* PrivacyFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F265F57467EBC18143F52B /* PrivacyFilterTests.swift */; };
+		248E9A758530134CAB544263 /* ClipboardParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9115F049D408F24EC4B2EC00 /* ClipboardParser.swift */; };
 		25E264E8FE8E797740593ABD /* ClipboardItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265E7B996C1825028DD2E41B /* ClipboardItemTests.swift */; };
+		375079078392BF0E2C1C7887 /* ContentFingerprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820CAE48D1031FDF6FB447EA /* ContentFingerprint.swift */; };
+		3F5993BAD659D0FF68981CC4 /* ClipboardParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97DB7A4603C3CA3FB3E5D96 /* ClipboardParserTests.swift */; };
+		8B9131671FDE64B7BE8C099D /* PrivacyFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706BC8585A141A691E8F8224 /* PrivacyFilter.swift */; };
 		916A798C9CEB6F4BE95C862C /* WPasteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5CE3B752B05127F80C484A /* WPasteApp.swift */; };
 		AB67E14B6C3242667E467F55 /* ClipboardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56A0A2E7FC873CA764DFD6A /* ClipboardItem.swift */; };
 		CE03899E9810242CA565E75F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4579D984A63A07A789838DF5 /* AppModel.swift */; };
@@ -28,10 +34,16 @@
 		265E7B996C1825028DD2E41B /* ClipboardItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardItemTests.swift; sourceTree = "<group>"; };
 		2DA09DA27067536467BF3A0B /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		4579D984A63A07A789838DF5 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		706BC8585A141A691E8F8224 /* PrivacyFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyFilter.swift; sourceTree = "<group>"; };
+		820CAE48D1031FDF6FB447EA /* ContentFingerprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFingerprint.swift; sourceTree = "<group>"; };
+		88B7F3451D99AFF4119323A7 /* PasteboardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshot.swift; sourceTree = "<group>"; };
 		8E5BCED182B36F324D1BFEF9 /* WPasteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WPasteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9115F049D408F24EC4B2EC00 /* ClipboardParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardParser.swift; sourceTree = "<group>"; };
 		A07CA8128F04740B495562E5 /* WPaste.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WPaste.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D56A0A2E7FC873CA764DFD6A /* ClipboardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardItem.swift; sourceTree = "<group>"; };
+		D7F265F57467EBC18143F52B /* PrivacyFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyFilterTests.swift; sourceTree = "<group>"; };
 		EF5CE3B752B05127F80C484A /* WPasteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WPasteApp.swift; sourceTree = "<group>"; };
+		F97DB7A4603C3CA3FB3E5D96 /* ClipboardParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardParserTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -48,9 +60,19 @@
 			isa = PBXGroup;
 			children = (
 				F604C00011BFC409E2D5BB44 /* App */,
+				C47221545778E5AAF6B1E85E /* Clipboard */,
 				49C820C821817E426129C9BD /* Domain */,
 			);
 			path = WPaste;
+			sourceTree = "<group>";
+		};
+		A99B747F57B04C23BAB1AB87 /* Clipboard */ = {
+			isa = PBXGroup;
+			children = (
+				F97DB7A4603C3CA3FB3E5D96 /* ClipboardParserTests.swift */,
+				D7F265F57467EBC18143F52B /* PrivacyFilterTests.swift */,
+			);
+			path = Clipboard;
 			sourceTree = "<group>";
 		};
 		B545118BD60B8C668A85C8DA /* Products */ = {
@@ -70,9 +92,21 @@
 			path = Domain;
 			sourceTree = "<group>";
 		};
+		C47221545778E5AAF6B1E85E /* Clipboard */ = {
+			isa = PBXGroup;
+			children = (
+				9115F049D408F24EC4B2EC00 /* ClipboardParser.swift */,
+				820CAE48D1031FDF6FB447EA /* ContentFingerprint.swift */,
+				88B7F3451D99AFF4119323A7 /* PasteboardSnapshot.swift */,
+				706BC8585A141A691E8F8224 /* PrivacyFilter.swift */,
+			);
+			path = Clipboard;
+			sourceTree = "<group>";
+		};
 		DC3EDF788DF0ADEFB0F1D04E /* WPasteTests */ = {
 			isa = PBXGroup;
 			children = (
+				A99B747F57B04C23BAB1AB87 /* Clipboard */,
 				BF58D97B88183C98241FB159 /* Domain */,
 			);
 			path = WPasteTests;
@@ -179,6 +213,10 @@
 				CE03899E9810242CA565E75F /* AppModel.swift in Sources */,
 				0CD97FA471CEC05CC9C2DDD7 /* AppSettings.swift in Sources */,
 				AB67E14B6C3242667E467F55 /* ClipboardItem.swift in Sources */,
+				248E9A758530134CAB544263 /* ClipboardParser.swift in Sources */,
+				375079078392BF0E2C1C7887 /* ContentFingerprint.swift in Sources */,
+				129F5E0BE57787E365BD78EC /* PasteboardSnapshot.swift in Sources */,
+				8B9131671FDE64B7BE8C099D /* PrivacyFilter.swift in Sources */,
 				916A798C9CEB6F4BE95C862C /* WPasteApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -188,6 +226,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				25E264E8FE8E797740593ABD /* ClipboardItemTests.swift in Sources */,
+				3F5993BAD659D0FF68981CC4 /* ClipboardParserTests.swift in Sources */,
+				2383FE8196B096A73E56B1CE /* PrivacyFilterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
