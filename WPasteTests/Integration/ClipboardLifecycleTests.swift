@@ -29,18 +29,16 @@ struct ClipboardLifecycleTests {
         #expect(imageStore.exists(relativePath: metadata.relativePath) == false)
     }
 
-    @Test func deletingHistoryCascadesPinboardAndStackReferences() throws {
+    @Test func deletingHistoryCascadesPinboardReferences() throws {
         let repository = try HistoryRepository.inMemory()
         let source = ClipboardSource(bundleIdentifier: nil, name: "Test")
         let item = try repository.upsert(payload: .text("value"), fingerprint: "value", source: source)
         let board = try repository.createPinboard(name: "Board")
         try repository.add(itemID: item.id, toPinboard: board.id)
-        try repository.addToStack(itemID: item.id)
 
         try repository.delete(id: item.id)
 
         #expect(try repository.itemIDs(inPinboard: board.id).isEmpty)
-        #expect(try repository.stackItemIDs().isEmpty)
     }
 
     @Test func replacingDuplicateImageDeletesSupersededFile() throws {

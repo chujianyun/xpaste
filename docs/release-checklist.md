@@ -15,7 +15,6 @@
 - [ ] Verify deduplication and newest-first ordering.
 - [ ] Verify search by text, URL, filename, and source application.
 - [ ] Verify one item can belong to multiple Pinboards and deleting a Pinboard retains history.
-- [ ] Verify Paste Stack reorder, removal, clearing, continuous paste, and failure retention.
 - [ ] Verify single- and multi-display placement, full-screen apps, Spaces, light/dark appearance, and scaled displays.
 - [ ] Verify missing accessibility permission degrades to copy-only.
 - [ ] Verify missing source files remain visible and cannot be pasted.

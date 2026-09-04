@@ -39,6 +39,24 @@ struct SettingsPersistenceTests {
         #expect(store.load() == [.showHistory: shortcut])
     }
 
+    @Test func shortcutLoadingIgnoresRemovedActionsAndKeepsKnownOverrides() throws {
+        let defaults = isolatedDefaults()
+        let store = ShortcutPersistence(defaults: defaults)
+        defaults.set(
+            Data("""
+            [
+              {"action":"showHistory","shortcut":{"keyCode":42,"modifiers":3}},
+              {"action":"showPasteStack","shortcut":{"keyCode":8,"modifiers":9}}
+            ]
+            """.utf8),
+            forKey: "WPaste.Shortcuts.v1"
+        )
+
+        #expect(store.load() == [
+            .showHistory: Shortcut(keyCode: 42, modifiers: [.command, .option])
+        ])
+    }
+
     private func isolatedDefaults() -> UserDefaults {
         let suite = "WPasteTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!

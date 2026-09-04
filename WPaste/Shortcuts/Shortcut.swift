@@ -16,7 +16,6 @@ struct Shortcut: Codable, Hashable, Sendable {
 
 enum ShortcutAction: String, CaseIterable, Codable, Hashable, Sendable {
     case showHistory
-    case showPasteStack
     case nextPinboard
     case previousPinboard
     case quickPaste

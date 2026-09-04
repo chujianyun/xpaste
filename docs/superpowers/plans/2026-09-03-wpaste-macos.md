@@ -4,7 +4,7 @@
 
 **Goal:** Build the macOS 15+ WPaste menu-bar clipboard manager described by the approved design and reference screenshots.
 
-**Architecture:** A Swift 6 SwiftUI application uses small service protocols around AppKit integration. SwiftData stores metadata and relationships, while an application-support file store owns image payloads and thumbnails. A central app model composes monitoring, filtering, search, pinboards, paste stack, shortcuts, and overlay presentation without exposing system APIs directly to views.
+**Architecture:** A Swift 6 SwiftUI application uses small service protocols around AppKit integration. SwiftData stores metadata and relationships, while an application-support file store owns image payloads and thumbnails. A central app model composes monitoring, filtering, search, pinboards, shortcuts, and overlay presentation without exposing system APIs directly to views.
 
 **Tech Stack:** Swift 6, SwiftUI, AppKit, SwiftData, XCTest/Swift Testing, ServiceManagement, Carbon hot-key APIs, Accessibility APIs, LinkPresentation.
 
@@ -17,7 +17,7 @@
 - The first release has no accounts, iCloud, AI, subscriptions, purchases, or telemetry.
 - Rejected clipboard content and rejected previews must never be persisted.
 - Default retention is exactly 7 days.
-- Missing accessibility permission must degrade automatic paste to copy-only without losing paste-stack state.
+- Missing accessibility permission must degrade automatic paste to copy-only.
 - The four screenshots in `protetype/` are the visual acceptance reference; unsupported sidebar entries shown there must not appear.
 
 ---
@@ -77,9 +77,9 @@
 **Interfaces:**
 - Produces: `HistoryRepositoryProtocol` with `upsert`, `search`, `delete`, `clear`, and `cleanExpired`; `ImageFileStoreProtocol` with `save`, `load`, and `delete`.
 
-- [ ] **Step 1: Write failing in-memory SwiftData tests** for newest-first order, fingerprint deduplication, multi-pinboard membership, pinboard deletion semantics, stack cascade cleanup, all retention options, missing files, and corrupt image metadata.
+- [ ] **Step 1: Write failing in-memory SwiftData tests** for newest-first order, fingerprint deduplication, multi-pinboard membership, pinboard deletion semantics, all retention options, missing files, and corrupt image metadata.
 - [ ] **Step 2: Run focused persistence tests and confirm failure.**
-- [ ] **Step 3: Implement SwiftData models** for item, pinboard, membership, stack entry, and settings. Store image paths relative to Application Support; do not copy source files.
+- [ ] **Step 3: Implement SwiftData models** for item, pinboard, membership, and settings. Store image paths relative to Application Support; do not copy source files.
 - [ ] **Step 4: Implement transactional upsert and cleanup.** A duplicate updates timestamp/source metadata and moves to the front. Deletion removes owned image assets after the model transaction succeeds.
 - [ ] **Step 5: Run focused tests and the full suite.**
 - [ ] **Step 6: Commit:** `git add WPaste/Persistence WPasteTests/Persistence && git commit -m 'feat: persist clipboard history'`.
@@ -102,24 +102,22 @@
 - [ ] **Step 5: Run focused and full tests.**
 - [ ] **Step 6: Commit:** `git add WPaste/Clipboard WPaste/App WPasteTests/Clipboard && git commit -m 'feat: monitor the system clipboard'`.
 
-### Task 5: Search, pinboards, and paste-stack behavior
+### Task 5: Search and pinboard behavior
 
 **Files:**
 - Create: `WPaste/Features/History/HistoryStore.swift`
 - Create: `WPaste/Features/Pinboards/PinboardStore.swift`
-- Create: `WPaste/Features/PasteStack/PasteStackStore.swift`
 - Create: `WPasteTests/Features/HistoryStoreTests.swift`
 - Create: `WPasteTests/Features/PinboardStoreTests.swift`
-- Create: `WPasteTests/Features/PasteStackStoreTests.swift`
 
 **Interfaces:**
-- Produces: observable stores with explicit commands for search, create/rename/reorder/delete pinboard, add/remove/reorder/clear/advance stack.
+- Produces: observable stores with explicit commands for search and create/rename/reorder/delete pinboard.
 
-- [ ] **Step 1: Write failing tests** for case/diacritic-insensitive search over text, URL, filename, and source app; multi-board favorites; stable ordering; successful advance; and copy-only failure retention.
+- [ ] **Step 1: Write failing tests** for case/diacritic-insensitive search over text, URL, filename, and source app; multi-board favorites; and stable ordering.
 - [ ] **Step 2: Run focused tests and confirm failure.**
 - [ ] **Step 3: Implement stores as `@MainActor @Observable` adapters** over the repository; views must not access SwiftData directly.
 - [ ] **Step 4: Run focused and full tests.**
-- [ ] **Step 5: Commit:** `git add WPaste/Features WPasteTests/Features && git commit -m 'feat: add search pinboards and paste stack'`.
+- [ ] **Step 5: Commit:** `git add WPaste/Features WPasteTests/Features && git commit -m 'feat: add search and pinboards'`.
 
 ### Task 6: Paste coordination and accessibility fallback
 
@@ -132,7 +130,7 @@
 **Interfaces:**
 - Produces: `PasteCoordinating.paste(item:mode:target:) async -> PasteResult`, where result is `.pasted`, `.copiedOnly(PasteFallbackReason)`, or `.unavailable`.
 
-- [ ] **Step 1: Write failing tests** for target capture, payload write, plain-text conversion, window-close/focus/paste ordering, exited target, denied accessibility, failed key event, and stack advancement only on `.pasted`.
+- [ ] **Step 1: Write failing tests** for target capture, payload write, plain-text conversion, window-close/focus/paste ordering, exited target, denied accessibility, and failed key event.
 - [ ] **Step 2: Run focused tests and confirm failure.**
 - [ ] **Step 3: Implement pasteboard writers for all four payloads**, an injectable accessibility client, and non-blocking fallback results. Mark the outgoing fingerprint for monitor suppression before writing.
 - [ ] **Step 4: Run focused and full tests.**
@@ -157,25 +155,23 @@
 - [ ] **Step 5: Run focused and full tests.**
 - [ ] **Step 6: Commit:** `git add WPaste/Shortcuts WPaste/Overlay WPasteTests/Shortcuts WPasteTests/Overlay && git commit -m 'feat: add shortcuts and overlay window'`.
 
-### Task 8: History cards, navigation, context actions, and stack UI
+### Task 8: History cards, navigation, and context actions
 
 **Files:**
 - Create: `WPaste/Features/History/HistoryOverlayView.swift`
 - Create: `WPaste/Features/History/ClipboardCardView.swift`
 - Create: `WPaste/Features/History/CardContentViews.swift`
 - Create: `WPaste/Features/History/OverlayNavigation.swift`
-- Create: `WPaste/Features/PasteStack/PasteStackView.swift`
 - Create: `WPasteUITests/OverlayUITests.swift`
 
 **Interfaces:**
-- Consumes: history, pinboard, stack stores and paste coordinator.
+- Consumes: history and pinboard stores plus the paste coordinator.
 
 - [ ] **Step 1: Add failing navigation unit tests and UI smoke tests** for search, arrow selection, Return, Escape, Command-1…9, context menu commands, board switching, and drag reorder.
 - [ ] **Step 2: Run focused tests and confirm failure.**
 - [ ] **Step 3: Implement the horizontal overlay to match `protetype/Xnip2026-09-03_18-26-47.jpg`.** Use fixed-width adaptive cards, source accent color/icon, selected outline, horizontal scrolling, screen-sharing redaction, missing-file disabled state, and accessible labels.
-- [ ] **Step 4: Implement the Paste Stack view** with reorder, remove, clear, next-item action, remaining-count notice, and copy-only retention notice.
-- [ ] **Step 5: Run tests, then capture light/dark screenshots at 1x and 2x for comparison.**
-- [ ] **Step 6: Commit:** `git add WPaste/Features WPasteUITests && git commit -m 'feat: build clipboard overlay interface'`.
+- [ ] **Step 4: Run tests, then capture light/dark screenshots at 1x and 2x for comparison.**
+- [ ] **Step 5: Commit:** `git add WPaste/Features WPasteUITests && git commit -m 'feat: build clipboard overlay interface'`.
 
 ### Task 9: Settings, login item, preview cache, and onboarding
 
@@ -218,4 +214,3 @@
 - [ ] **Step 4: Run:** `xcodebuild test -project WPaste.xcodeproj -scheme WPaste -destination 'platform=macOS'` and `xcodebuild archive -project WPaste.xcodeproj -scheme WPaste -archivePath build/WPaste.xcarchive`.
 - [ ] **Step 5: Perform the manual acceptance matrix** from design section 10.3 and record pass/fail results in `docs/release-checklist.md`; do not claim unsupported third-party app coverage without executing it.
 - [ ] **Step 6: Commit:** `git add Config Scripts docs/release-checklist.md WPasteTests/Integration && git commit -m 'build: add WPaste release packaging'`.
-

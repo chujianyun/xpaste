@@ -118,19 +118,6 @@ final class PinboardItemRecord {
     }
 }
 
-@Model
-final class StackEntryRecord {
-    @Attribute(.unique) var id: UUID
-    var itemID: UUID
-    var order: Int
-
-    init(id: UUID = UUID(), itemID: UUID, order: Int) {
-        self.id = id
-        self.itemID = itemID
-        self.order = order
-    }
-}
-
 struct Pinboard: Identifiable, Equatable, Sendable {
     let id: UUID
     var name: String

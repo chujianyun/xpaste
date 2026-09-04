@@ -7,7 +7,6 @@ struct ShortcutSettingsView: View {
         Form {
             Section {
                 shortcutRow("启动 WPaste", action: .showHistory)
-                shortcutRow("启动 Paste Stack", action: .showPasteStack)
             }
             Section {
                 shortcutRow("显示下一个 Pinboard", action: .nextPinboard)

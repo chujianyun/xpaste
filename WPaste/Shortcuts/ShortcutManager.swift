@@ -13,7 +13,6 @@ protocol ShortcutRegistering: AnyObject {
 final class ShortcutManager {
     static let defaultShortcuts: [ShortcutAction: Shortcut] = [
         .showHistory: .init(keyCode: 9, modifiers: [.command, .shift]),
-        .showPasteStack: .init(keyCode: 8, modifiers: [.command, .shift]),
         .nextPinboard: .init(keyCode: 124, modifiers: [.command]),
         .previousPinboard: .init(keyCode: 123, modifiers: [.command]),
         .quickPaste: .init(keyCode: 18, modifiers: [.command]),
@@ -69,7 +68,7 @@ final class ShortcutManager {
 
 private extension ShortcutAction {
     var requiresGlobalRegistration: Bool {
-        self == .showHistory || self == .showPasteStack
+        self == .showHistory
     }
 }
 

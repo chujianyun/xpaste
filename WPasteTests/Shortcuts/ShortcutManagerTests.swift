@@ -3,14 +3,24 @@ import Testing
 
 @MainActor
 struct ShortcutManagerTests {
+    @Test func availableActionsExcludeRemovedPasteStack() {
+        #expect(ShortcutAction.allCases == [
+            .showHistory,
+            .nextPinboard,
+            .previousPinboard,
+            .quickPaste,
+            .plainTextMode
+        ])
+    }
+
     @Test func rejectsDuplicateChordWithoutChangingExistingShortcut() {
         let registrar = FakeShortcutRegistrar()
         let manager = ShortcutManager(registrar: registrar)
         let original = manager.shortcuts[.showHistory]
 
-        let result = manager.update(.showHistory, to: manager.shortcuts[.showPasteStack]!)
+        let result = manager.update(.showHistory, to: manager.shortcuts[.nextPinboard]!)
 
-        #expect(result == .internalConflict(.showPasteStack))
+        #expect(result == .internalConflict(.nextPinboard))
         #expect(manager.shortcuts[.showHistory] == original)
     }
 
@@ -52,4 +62,3 @@ private final class FakeShortcutRegistrar: ShortcutRegistering {
         registered.remove(shortcut)
     }
 }
-

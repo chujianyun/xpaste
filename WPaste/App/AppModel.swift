@@ -40,7 +40,6 @@ final class AppModel {
         shortcutManager.onAction = { [weak self] action in
             switch action {
             case .showHistory: self?.showHistory()
-            case .showPasteStack: self?.showPasteStack()
             default: break
             }
         }
@@ -125,34 +124,19 @@ final class AppModel {
         pasteTarget = frontmostApplication.capture()
         let history = HistoryStore(repository: repository)
         let pinboards = PinboardStore(repository: repository)
-        let stack = PasteStackStore(repository: repository)
         let linkPreviewsEnabled = settings.linkPreviewsEnabled
         overlay.show(hideFromScreenCapture: settings.hideDuringScreenSharing) { [weak self] in
             HistoryOverlayView(
                 history: history,
                 pinboards: pinboards,
-                stack: stack,
                 linkPreviewsEnabled: linkPreviewsEnabled,
-                onPaste: { item, plainText in self?.paste(item, plainText: plainText, stack: nil) },
+                onPaste: { item, plainText in self?.paste(item, plainText: plainText) },
                 onClose: { self?.overlay.hide() }
             )
         }
     }
 
-    func showPasteStack() {
-        guard let repository else { return }
-        pasteTarget = frontmostApplication.capture()
-        let stack = PasteStackStore(repository: repository)
-        overlay.show(hideFromScreenCapture: settings.hideDuringScreenSharing) { [weak self] in
-            PasteStackView(
-                store: stack,
-                onPasteNext: { item in self?.paste(item, plainText: false, stack: stack) },
-                onClose: { self?.overlay.hide() }
-            )
-        }
-    }
-
-    private func paste(_ item: ClipboardItem, plainText: Bool, stack: PasteStackStore?) {
+    private func paste(_ item: ClipboardItem, plainText: Bool) {
         let coordinator = PasteCoordinator(
             pasteboard: SystemPasteboardWriter(),
             accessibility: SystemAccessibilityClient(),
@@ -168,7 +152,6 @@ final class AppModel {
         if settings.soundEnabled, result == .pasted || result == .copied {
             NSSound(named: "Tink")?.play()
         }
-        try? stack?.completeFirst(successfullyPasted: result == .pasted)
         switch result {
         case .pasted: userNotice = nil
         case .copied: userNotice = "已复制到剪贴板"

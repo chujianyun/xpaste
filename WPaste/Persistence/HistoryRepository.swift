@@ -22,7 +22,6 @@ final class HistoryRepository {
             for: HistoryRecord.self,
             PinboardRecord.self,
             PinboardItemRecord.self,
-            StackEntryRecord.self,
             configurations: configuration
         )
         context = container.mainContext
@@ -105,8 +104,6 @@ final class HistoryRepository {
         records.forEach(context.delete)
         let memberships = FetchDescriptor<PinboardItemRecord>(predicate: #Predicate { $0.itemID == id })
         try context.fetch(memberships).forEach(context.delete)
-        let stackEntries = FetchDescriptor<StackEntryRecord>(predicate: #Predicate { $0.itemID == id })
-        try context.fetch(stackEntries).forEach(context.delete)
         try context.save()
         for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
     }
@@ -115,7 +112,6 @@ final class HistoryRepository {
         let imagePaths = try context.fetch(FetchDescriptor<HistoryRecord>()).compactMap(\.imageRelativePath)
         try context.delete(model: HistoryRecord.self)
         try context.delete(model: PinboardItemRecord.self)
-        try context.delete(model: StackEntryRecord.self)
         try context.save()
         for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
     }
@@ -131,9 +127,6 @@ final class HistoryRepository {
         expired.forEach(context.delete)
         for membership in try context.fetch(FetchDescriptor<PinboardItemRecord>()) where expiredIDs.contains(membership.itemID) {
             context.delete(membership)
-        }
-        for entry in try context.fetch(FetchDescriptor<StackEntryRecord>()) where expiredIDs.contains(entry.itemID) {
-            context.delete(entry)
         }
         try context.save()
         for path in imagePaths { try imageFileStore?.delete(relativePath: path) }
@@ -193,53 +186,6 @@ final class HistoryRepository {
         return try context.fetch(descriptor).map(\.itemID)
     }
 
-    func addToStack(itemID: UUID) throws {
-        let existing = try stackItemIDs()
-        guard !existing.contains(itemID) else { return }
-        context.insert(StackEntryRecord(itemID: itemID, order: existing.count))
-        try context.save()
-    }
-
-    func stackItemIDs() throws -> [UUID] {
-        let descriptor = FetchDescriptor<StackEntryRecord>(sortBy: [SortDescriptor(\.order)])
-        return try context.fetch(descriptor).map(\.itemID)
-    }
-
-    func moveStackItem(from source: Int, to destination: Int) throws {
-        let descriptor = FetchDescriptor<StackEntryRecord>(sortBy: [SortDescriptor(\.order)])
-        var entries = try context.fetch(descriptor)
-        guard entries.indices.contains(source), destination >= 0, destination < entries.count else { return }
-        let moved = entries.remove(at: source)
-        entries.insert(moved, at: destination)
-        for (index, entry) in entries.enumerated() { entry.order = index }
-        try context.save()
-    }
-
-    func removeFirstStackItem() throws {
-        let descriptor = FetchDescriptor<StackEntryRecord>(sortBy: [SortDescriptor(\.order)])
-        let entries = try context.fetch(descriptor)
-        guard let first = entries.first else { return }
-        context.delete(first)
-        for (index, entry) in entries.dropFirst().enumerated() { entry.order = index }
-        try context.save()
-    }
-
-    func removeStackItem(id: UUID) throws {
-        let descriptor = FetchDescriptor<StackEntryRecord>(predicate: #Predicate { $0.itemID == id })
-        try context.fetch(descriptor).forEach(context.delete)
-        try normalizeStackOrder()
-    }
-
-    func clearStack() throws {
-        try context.delete(model: StackEntryRecord.self)
-        try context.save()
-    }
-
-    private func normalizeStackOrder() throws {
-        let descriptor = FetchDescriptor<StackEntryRecord>(sortBy: [SortDescriptor(\.order)])
-        for (index, entry) in try context.fetch(descriptor).enumerated() { entry.order = index }
-        try context.save()
-    }
 }
 
 private extension HistoryRetention {

@@ -36,22 +36,6 @@ struct FeatureStoreTests {
         #expect(try store.itemIDs(in: later.id) == [item.id])
     }
 
-    @Test func pasteStackReordersAndOnlyAdvancesAfterAutomaticPaste() throws {
-        let repository = try HistoryRepository.inMemory()
-        let first = try repository.upsert(payload: .text("first"), fingerprint: "first", source: source)
-        let second = try repository.upsert(payload: .text("second"), fingerprint: "second", source: source)
-        let stack = PasteStackStore(repository: repository)
-        try stack.add(first.id)
-        try stack.add(second.id)
-        try stack.move(from: 1, to: 0)
-        #expect(try stack.items().map(\.id) == [second.id, first.id])
-
-        try stack.completeFirst(successfullyPasted: false)
-        #expect(try stack.items().count == 2)
-        try stack.completeFirst(successfullyPasted: true)
-        #expect(try stack.items().map(\.id) == [first.id])
-    }
-
     @Test func pinboardsCanBeRenamedAndReordered() throws {
         let repository = try HistoryRepository.inMemory()
         let store = PinboardStore(repository: repository)

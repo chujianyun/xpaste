@@ -13,7 +13,6 @@ struct WPasteApp: App {
         MenuBarExtra("WPaste", systemImage: "clipboard") {
             Button("打开剪贴板历史") { model.showHistory() }
                 .keyboardShortcut("v", modifiers: [.command, .shift])
-            Button("打开 Paste Stack") { model.showPasteStack() }
             Toggle("暂停记录", isOn: $model.settings.recordingPaused)
             if let notice = model.userNotice {
                 Divider()

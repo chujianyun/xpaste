@@ -55,9 +55,7 @@
 		E4729BF4D3AFF69941E8013E /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AD33BB933A03CAA31B4B96 /* OverlayWindowController.swift */; };
 		EE85419A4D4DB6D381AF56C9 /* ImageFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107BAC8ACB4B8230113E99E3 /* ImageFileStore.swift */; };
 		F2CC46AAD0AE58965A292048 /* ShortcutPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9129CFB75B60DA920060F6F4 /* ShortcutPersistence.swift */; };
-		F3371A66C1E8444E2D3A2787 /* PasteStackStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F64CFBC88455C821F46DDF /* PasteStackStore.swift */; };
 		F4AD730FBAEC8E077209CA7B /* OverlayNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE719B65E0E3EE16E0994D8D /* OverlayNavigationTests.swift */; };
-		F7D4B18FA448D34D2D26655B /* PasteStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B66DFAF127385B16549D58E /* PasteStackView.swift */; };
 		FE49E874A770600BE10FBE4E /* SettingsPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF9294C4941A5F8AD778FC2 /* SettingsPersistence.swift */; };
 /* End PBXBuildFile section */
 
@@ -86,12 +84,10 @@
 		410D525D3DC64FE7F1F6910F /* OverlayPlacementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPlacementTests.swift; sourceTree = "<group>"; };
 		4579D984A63A07A789838DF5 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		52306C3CEB128770C52C1B82 /* ShortcutRecorderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderButton.swift; sourceTree = "<group>"; };
-		5B66DFAF127385B16549D58E /* PasteStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteStackView.swift; sourceTree = "<group>"; };
 		6724F7B29D19B84F51ACBAA5 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		6F81879232C1A938E9A847A1 /* CardContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContentViews.swift; sourceTree = "<group>"; };
 		706BC8585A141A691E8F8224 /* PrivacyFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyFilter.swift; sourceTree = "<group>"; };
 		768BE969B6F79A6D405808E7 /* LinkPreviewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewService.swift; sourceTree = "<group>"; };
-		77F64CFBC88455C821F46DDF /* PasteStackStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteStackStore.swift; sourceTree = "<group>"; };
 		820CAE48D1031FDF6FB447EA /* ContentFingerprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFingerprint.swift; sourceTree = "<group>"; };
 		88B7F3451D99AFF4119323A7 /* PasteboardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshot.swift; sourceTree = "<group>"; };
 		8E5BCED182B36F324D1BFEF9 /* WPasteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WPasteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -145,15 +141,6 @@
 				FE01972DE5CA8881EE220F03 /* ShortcutManagerTests.swift */,
 			);
 			path = Shortcuts;
-			sourceTree = "<group>";
-		};
-		2CCD5DF52CE6588AE21531A6 /* PasteStack */ = {
-			isa = PBXGroup;
-			children = (
-				77F64CFBC88455C821F46DDF /* PasteStackStore.swift */,
-				5B66DFAF127385B16549D58E /* PasteStackView.swift */,
-			);
-			path = PasteStack;
 			sourceTree = "<group>";
 		};
 		3C0C6CDAC2C775ADEFAA062D /* Integration */ = {
@@ -254,7 +241,6 @@
 			children = (
 				A0BAF63231397C0115FD4A9B /* History */,
 				AE8AB0E86786AB497E35F0D8 /* Onboarding */,
-				2CCD5DF52CE6588AE21531A6 /* PasteStack */,
 				8AAACEF21B63A43C34C9460F /* Pinboards */,
 				6B7998A19E6CA48EBA64C984 /* Settings */,
 			);
@@ -520,8 +506,6 @@
 				B21B33A3ED4313F071D013A8 /* OverlayNavigation.swift in Sources */,
 				E4729BF4D3AFF69941E8013E /* OverlayWindowController.swift in Sources */,
 				6341B310D0EC12C330098BC2 /* PasteCoordinator.swift in Sources */,
-				F3371A66C1E8444E2D3A2787 /* PasteStackStore.swift in Sources */,
-				F7D4B18FA448D34D2D26655B /* PasteStackView.swift in Sources */,
 				DC232CFEADE9CA5C32B451EF /* PasteboardClient.swift in Sources */,
 				129F5E0BE57787E365BD78EC /* PasteboardSnapshot.swift in Sources */,
 				0BEA5D57506C0E23A7A4E24A /* PinboardStore.swift in Sources */,

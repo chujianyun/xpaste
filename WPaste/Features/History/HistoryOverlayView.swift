@@ -3,7 +3,6 @@ import SwiftUI
 struct HistoryOverlayView: View {
     @Bindable var history: HistoryStore
     @Bindable var pinboards: PinboardStore
-    let stack: PasteStackStore
     var linkPreviewsEnabled = true
     let onPaste: (ClipboardItem, Bool) -> Void
     let onClose: () -> Void
@@ -132,7 +131,6 @@ struct HistoryOverlayView: View {
                 Button(board.name) { try? pinboards.add(itemID: item.id, to: board.id) }
             }
         }
-        Button("加入 Paste Stack") { try? stack.add(item.id) }
         Divider()
         Button("删除", role: .destructive) { try? history.delete(id: item.id); syncCount() }
     }
