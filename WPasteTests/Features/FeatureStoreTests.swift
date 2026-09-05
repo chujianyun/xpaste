@@ -7,6 +7,53 @@ import Testing
 struct FeatureStoreTests {
     private let source = ClipboardSource(bundleIdentifier: "com.apple.Safari", name: "Safari")
 
+    @Test func overlaySettingsButtonOpensSettingsAndReusesWindowAfterClosing() throws {
+        let model = AppModel(settings: .default)
+        defer { model.stop() }
+        let existingWindows = Set(NSApp.windows.map(ObjectIdentifier.init))
+        defer {
+            for window in NSApp.windows where !existingWindows.contains(ObjectIdentifier(window)) {
+                window.orderOut(nil)
+                window.contentViewController = nil
+                window.contentView = nil
+            }
+        }
+
+        func settingsButton(in view: NSView) -> NSButton? {
+            if let button = view as? NSButton, button.accessibilityIdentifier() == "overlay-settings" {
+                return button
+            }
+            return view.subviews.lazy.compactMap { settingsButton(in: $0) }.first
+        }
+
+        var settingsWindow: NSWindow?
+        for _ in 0..<2 {
+            model.showHistory()
+            let panel = try #require(NSApp.windows.first {
+                !existingWindows.contains(ObjectIdentifier($0)) && $0 is NSPanel && $0.isVisible
+            })
+            let contentView = try #require(panel.contentView)
+            contentView.layoutSubtreeIfNeeded()
+            let button = try #require(settingsButton(in: contentView))
+            let frame = panel.convertToScreen(button.convert(button.bounds, to: nil))
+            #expect(frame.midX > panel.frame.maxX - 80)
+            #expect(frame.midY > panel.frame.maxY - 60)
+            button.performClick(nil)
+
+            #expect(!panel.isVisible)
+            let windows = NSApp.windows.filter {
+                !existingWindows.contains(ObjectIdentifier($0)) && !($0 is NSPanel) && $0.isVisible
+            }
+            #expect(windows.count == 1)
+            let window = try #require(windows.first)
+            #expect(window.canBecomeKey)
+            #expect(window.contentViewController is NSHostingController<SettingsView>)
+            if let settingsWindow { #expect(window === settingsWindow) }
+            settingsWindow = window
+            window.performClose(nil)
+        }
+    }
+
     @Test func historySearchMatchesTextURLFilenameAndSource() throws {
         let repository = try HistoryRepository.inMemory()
         _ = try repository.upsert(payload: .text("季度计划"), fingerprint: "text", source: source)
@@ -31,7 +78,8 @@ struct FeatureStoreTests {
             history: history,
             pinboards: PinboardStore(repository: repository),
             onPaste: { _, _ in },
-            onClose: {}
+            onClose: {},
+            onOpenSettings: {}
         ))
         view.frame = NSRect(x: 0, y: 0, width: 900, height: 320)
         let window = NSWindow(contentRect: view.frame, styleMask: [.borderless], backing: .buffered, defer: false)

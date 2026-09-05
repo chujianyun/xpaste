@@ -6,6 +6,7 @@ struct HistoryOverlayView: View {
     var linkPreviewsEnabled = true
     let onPaste: (ClipboardItem, Bool) -> Void
     let onClose: () -> Void
+    let onOpenSettings: () -> Void
 
     @State private var navigation = OverlayNavigation(itemCount: 0)
     @State private var selectedPinboardID: UUID?
@@ -91,6 +92,8 @@ struct HistoryOverlayView: View {
             Button { showingNewPinboard = true } label: { Image(systemName: "plus") }
                 .buttonStyle(.plain)
             Spacer()
+            OverlaySettingsButton(action: onOpenSettings)
+                .frame(width: 28, height: 28)
         }
         .padding(.horizontal, 24)
     }
@@ -148,6 +151,40 @@ struct HistoryOverlayView: View {
     private func pasteSelection(plainText: Bool) {
         guard let index = navigation.selectedIndex, displayedItems.indices.contains(index) else { return }
         onPaste(displayedItems[index], plainText)
+    }
+}
+
+private struct OverlaySettingsButton: NSViewRepresentable {
+    let action: () -> Void
+
+    func makeNSView(context: Context) -> NSButton {
+        let button = NSButton(
+            image: NSImage(systemSymbolName: "ellipsis", accessibilityDescription: "打开设置")!,
+            target: context.coordinator,
+            action: #selector(Coordinator.openSettings)
+        )
+        button.isBordered = false
+        button.imageScaling = .scaleProportionallyDown
+        button.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
+        button.toolTip = "打开设置"
+        button.setAccessibilityLabel("打开设置")
+        button.setAccessibilityIdentifier("overlay-settings")
+        return button
+    }
+
+    func updateNSView(_ button: NSButton, context: Context) {
+        context.coordinator.action = action
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(action: action) }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var action: () -> Void
+
+        init(action: @escaping () -> Void) { self.action = action }
+
+        @objc func openSettings() { action() }
     }
 }
 

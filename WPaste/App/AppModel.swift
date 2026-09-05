@@ -10,17 +10,19 @@ final class AppModel {
     let repository: HistoryRepository?
     private(set) var monitor: ClipboardMonitor?
     private let overlay = OverlayWindowController()
-    private let shortcutManager = ShortcutManager()
+    private let shortcutManager: ShortcutManager
     private let shortcutPersistence = ShortcutPersistence()
     private let frontmostApplication = FrontmostApplicationClient()
     private let settingsPersistence = SettingsPersistence()
     private let loginItem = LoginItemClient()
     private let linkPreviewService = LinkPreviewService()
     private let onboardingWindow = OnboardingWindowController()
+    private let settingsWindow = SettingsWindowController()
     private var pasteTarget: ApplicationTargeting?
     private var maintenanceTask: Task<Void, Never>?
 
-    init(settings: AppSettings? = nil) {
+    init(settings: AppSettings? = nil, shortcutManager: ShortcutManager = ShortcutManager()) {
+        self.shortcutManager = shortcutManager
         self.settings = settings ?? SettingsPersistence().load()
         repository = try? HistoryRepository()
         monitor = nil
@@ -117,6 +119,10 @@ final class AppModel {
     }
 
     func showHistory() {
+        if overlay.isVisible {
+            overlay.hide()
+            return
+        }
         guard let repository else {
             userNotice = "无法打开历史数据库"
             return
@@ -131,9 +137,15 @@ final class AppModel {
                 pinboards: pinboards,
                 linkPreviewsEnabled: linkPreviewsEnabled,
                 onPaste: { item, plainText in self?.paste(item, plainText: plainText) },
-                onClose: { self?.overlay.hide() }
+                onClose: { self?.overlay.hide() },
+                onOpenSettings: { self?.showSettings() }
             )
         }
+    }
+
+    func showSettings() {
+        overlay.hide()
+        settingsWindow.show(model: self)
     }
 
     private func paste(_ item: ClipboardItem, plainText: Bool) {

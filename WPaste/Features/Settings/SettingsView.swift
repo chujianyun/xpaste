@@ -29,7 +29,8 @@ struct SettingsView: View {
             .navigationTitle((selection ?? .general).rawValue)
             .padding(16)
         }
-        .frame(width: 716, height: 668)
+        .frame(width: 900, height: 500)
+        .background(SettingsWindowAppearance())
         .onChange(of: model.settings) { _, _ in model.persistSettings() }
     }
 
@@ -42,3 +43,25 @@ struct SettingsView: View {
     }
 }
 
+private struct SettingsWindowAppearance: NSViewRepresentable {
+    func makeNSView(context: Context) -> WindowView { WindowView() }
+
+    func updateNSView(_ nsView: WindowView, context: Context) {
+        nsView.applyAppearance()
+    }
+
+    final class WindowView: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            applyAppearance()
+        }
+
+        func applyAppearance() {
+            guard let window else { return }
+            // Blend the native traffic lights into the sidebar's titlebar area.
+            window.titlebarAppearsTransparent = true
+            window.titlebarSeparatorStyle = .none
+            window.toolbarStyle = .unified
+        }
+    }
+}

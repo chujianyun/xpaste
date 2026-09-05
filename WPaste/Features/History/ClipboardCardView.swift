@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct ClipboardCardView: View {
@@ -38,8 +39,10 @@ struct ClipboardCardView: View {
             .background(.background)
 
             HStack {
-                Text(item.source.name)
-                    .lineLimit(1)
+                if let icon = sourceApplicationIcon {
+                    SourceApplicationIconView(image: icon, name: item.source.name)
+                        .frame(width: 20, height: 20)
+                }
                 Spacer()
                 Image(systemName: "line.3.horizontal")
             }
@@ -60,6 +63,16 @@ struct ClipboardCardView: View {
         .accessibilityLabel("\(item.payload.kindLabel)，来自 \(item.source.name)")
     }
 
+    private var sourceApplicationIcon: NSImage? {
+        guard let bundleIdentifier = item.source.bundleIdentifier,
+              !bundleIdentifier.isEmpty,
+              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
+            return nil
+        }
+        let icon = NSWorkspace.shared.icon(forFile: url.path)
+        return icon.isValid ? icon : nil
+    }
+
     private var headerColor: Color {
         switch item.payload {
         case .text: .green
@@ -67,5 +80,23 @@ struct ClipboardCardView: View {
         case .image: .blue
         case .files: .blue
         }
+    }
+}
+
+private struct SourceApplicationIconView: NSViewRepresentable {
+    let image: NSImage
+    let name: String
+
+    func makeNSView(context: Context) -> NSImageView {
+        let view = NSImageView()
+        view.imageScaling = .scaleProportionallyUpOrDown
+        view.setAccessibilityIdentifier("clipboard-source-icon")
+        return view
+    }
+
+    func updateNSView(_ view: NSImageView, context: Context) {
+        view.image = image
+        view.toolTip = name
+        view.setAccessibilityLabel(name)
     }
 }

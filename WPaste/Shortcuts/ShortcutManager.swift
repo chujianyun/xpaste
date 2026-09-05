@@ -24,13 +24,16 @@ final class ShortcutManager {
     private let registrar: ShortcutRegistering
     private var notificationToken: NSObjectProtocol?
 
-    init(registrar: ShortcutRegistering = CarbonShortcutRegistrar()) {
+    init(
+        registrar: ShortcutRegistering = CarbonShortcutRegistrar(),
+        notificationCenter: NotificationCenter = .default
+    ) {
         self.registrar = registrar
         shortcuts = Self.defaultShortcuts
         for (action, shortcut) in shortcuts where action.requiresGlobalRegistration {
             _ = registrar.register(shortcut, action: action)
         }
-        notificationToken = NotificationCenter.default.addObserver(
+        notificationToken = notificationCenter.addObserver(
             forName: .wpasteShortcut,
             object: nil,
             queue: .main

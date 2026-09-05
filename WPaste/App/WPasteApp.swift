@@ -20,15 +20,12 @@ struct WPasteApp: App {
                     .font(.caption)
             }
             Divider()
-            SettingsLink { Text("设置…") }
+            Button("设置…") { model.showSettings() }
+                .keyboardShortcut(",", modifiers: .command)
             Button("退出 WPaste") {
                 model.stop()
                 NSApplication.shared.terminate(nil)
             }
-        }
-
-        Settings {
-            SettingsView(model: model)
         }
     }
 }

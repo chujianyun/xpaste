@@ -1,8 +1,43 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import WPaste
 
 struct SettingsPersistenceTests {
+    @Test @MainActor func settingsTitlebarBlendsWithSidebarAndKeepsNativeControls() throws {
+        let model = AppModel(settings: .default)
+        defer { model.stop() }
+        let view = NSHostingView(rootView: SettingsView(model: model))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 900, height: 500),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            backing: .buffered, defer: false
+        )
+        window.contentView = view
+        defer { window.orderOut(nil); window.contentView = nil }
+        view.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.2))
+
+        #expect(window.titlebarAppearsTransparent)
+        #expect(window.titlebarSeparatorStyle == .none)
+        #expect(window.toolbarStyle == .unified)
+        for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+            let button = try #require(window.standardWindowButton(kind))
+            #expect(!button.isHidden)
+        }
+    }
+
+    @Test @MainActor func settingsWindowUsesWideCompactLayout() {
+        let model = AppModel(settings: .default)
+        defer { model.stop() }
+        let view = NSHostingView(rootView: SettingsView(model: model))
+        let size = view.fittingSize
+
+        #expect(size.width == 900)
+        #expect(size.height <= 500)
+        #expect(size.width / size.height >= 1.5)
+    }
+
     @Test func missingSettingsLoadProductDefaults() {
         let defaults = isolatedDefaults()
         let store = SettingsPersistence(defaults: defaults)
