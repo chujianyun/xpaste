@@ -24,13 +24,14 @@ xcodebuild test \
   -quiet \
   -project "${project_root}/WPaste.xcodeproj" \
   -scheme WPaste \
-  -destination 'platform=macOS' \
+  -destination "platform=macOS,arch=$(uname -m)" \
   "${signing_args[@]}"
 
 xcodebuild archive \
   -quiet \
   -project "${project_root}/WPaste.xcodeproj" \
   -scheme WPaste \
+  -destination 'generic/platform=macOS' \
   -configuration Release \
   -archivePath "${archive_path}" \
   "${signing_args[@]}"
@@ -44,4 +45,3 @@ hdiutil create \
   "${dmg_path}"
 
 echo "Created ${dmg_path}"
-
