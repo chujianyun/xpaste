@@ -1,10 +1,17 @@
-import Foundation
+import AppKit
 import Testing
 @testable import WPaste
 
 @MainActor
 struct PasteCoordinatorTests {
     private let source = ClipboardSource(bundleIdentifier: "com.apple.TextEdit", name: "文本编辑")
+
+    @Test func capturedApplicationRemainsAvailableAfterCaptureScopeEnds() {
+        let target = autoreleasepool {
+            RunningApplicationTarget(application: NSRunningApplication(processIdentifier: ProcessInfo.processInfo.processIdentifier)!)
+        }
+        #expect(target.isRunning)
+    }
 
     @Test func automaticPasteWritesClosesActivatesAndSendsInOrder() {
         var events: [String] = []
@@ -36,7 +43,7 @@ struct PasteCoordinatorTests {
         let result = coordinator.paste(item: item, mode: .automatic(plainText: false), target: RecordingApplicationTarget(isRunning: true) { events.append($0) })
 
         #expect(result == .copiedOnly(.accessibilityPermissionMissing))
-        #expect(events == ["write", "close"])
+        #expect(events == ["write", "close", "permission"])
     }
 
     @Test func plainTextModeWritesStringRepresentation() {
@@ -52,6 +59,48 @@ struct PasteCoordinatorTests {
 
         #expect(writer.lastPlainText == true)
         #expect(writer.lastPayload == item.payload)
+    }
+
+    @Test(arguments: [
+        ClipboardPayload.text("hello"),
+        ClipboardPayload.image(ImageMetadata(width: 10, height: 10, relativePath: "Images/test.png"))
+    ])
+    func repeatedDeniedPastesPromptOnlyOnceAndStillCopy(payload: ClipboardPayload) {
+        var events: [String] = []
+        let coordinator = PasteCoordinator(
+            pasteboard: RecordingPasteboardWriter { events.append($0) },
+            accessibility: RecordingAccessibilityClient(trusted: false) { events.append($0) },
+            closeOverlay: { events.append("close") }
+        )
+        let item = ClipboardItem(payload: payload, fingerprint: "repeated", source: source)
+
+        for _ in 0..<3 {
+            #expect(coordinator.paste(item: item, mode: .automatic(plainText: false), target: nil)
+                == .copiedOnly(.accessibilityPermissionMissing))
+        }
+
+        #expect(events.filter { $0 == "permission" }.count == 1)
+        #expect(events.filter { $0 == "write" }.count == 3)
+        #expect(!events.contains("paste"))
+    }
+
+    @Test func grantingPermissionAfterPromptRestoresAutomaticPaste() {
+        var events: [String] = []
+        let accessibility = RecordingAccessibilityClient(trusted: false) { events.append($0) }
+        let coordinator = PasteCoordinator(
+            pasteboard: RecordingPasteboardWriter { events.append($0) },
+            accessibility: accessibility,
+            closeOverlay: { events.append("close") }
+        )
+        let item = ClipboardItem(payload: .text("hello"), fingerprint: "hello", source: source)
+        let target = RecordingApplicationTarget(isRunning: true) { events.append($0) }
+
+        #expect(coordinator.paste(item: item, mode: .automatic(plainText: false), target: target)
+            == .copiedOnly(.accessibilityPermissionMissing))
+        accessibility.isTrusted = true
+        #expect(coordinator.paste(item: item, mode: .automatic(plainText: false), target: target) == .pasted)
+        #expect(events.filter { $0 == "permission" }.count == 1)
+        #expect(events.suffix(2) == ["activate", "paste"])
     }
 
     @Test func exitedTargetLeavesContentCopied() {
@@ -83,8 +132,8 @@ private final class RecordingPasteboardWriter: PasteboardWriting {
 }
 
 @MainActor
-private struct RecordingAccessibilityClient: AccessibilityControlling {
-    let isTrusted: Bool
+private final class RecordingAccessibilityClient: AccessibilityControlling {
+    var isTrusted: Bool
     let record: (String) -> Void
 
     init(trusted: Bool, record: @escaping (String) -> Void) {
@@ -95,6 +144,10 @@ private struct RecordingAccessibilityClient: AccessibilityControlling {
     func sendPasteCommand() -> Bool {
         record("paste")
         return true
+    }
+
+    func requestPermission() {
+        record("permission")
     }
 }
 
@@ -113,4 +166,3 @@ private final class RecordingApplicationTarget: ApplicationTargeting {
         return true
     }
 }
-

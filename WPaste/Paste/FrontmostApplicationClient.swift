@@ -8,16 +8,18 @@ protocol ApplicationTargeting: AnyObject {
 
 @MainActor
 final class RunningApplicationTarget: ApplicationTargeting {
-    private weak var application: NSRunningApplication?
+    // The workspace can release its wrapper after the history panel takes focus.
+    // Retain it until pasting finishes; isTerminated still tracks a real app exit.
+    private let application: NSRunningApplication
 
     init(application: NSRunningApplication) {
         self.application = application
     }
 
-    var isRunning: Bool { application?.isTerminated == false }
+    var isRunning: Bool { !application.isTerminated }
 
     func activate() -> Bool {
-        application?.activate(options: [.activateAllWindows]) ?? false
+        application.activate(options: [.activateAllWindows])
     }
 }
 
@@ -28,4 +30,3 @@ struct FrontmostApplicationClient {
         return RunningApplicationTarget(application: application)
     }
 }
-

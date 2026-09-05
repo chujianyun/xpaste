@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Observation
+import OSLog
 
 @MainActor
 @Observable
@@ -20,6 +21,15 @@ final class AppModel {
     private let settingsWindow = SettingsWindowController()
     private var pasteTarget: ApplicationTargeting?
     private var maintenanceTask: Task<Void, Never>?
+    // Keep permission prompt state for the app session, across history selections.
+    @ObservationIgnored private lazy var pasteCoordinator = PasteCoordinator(
+        pasteboard: SystemPasteboardWriter(),
+        accessibility: SystemAccessibilityClient(),
+        closeOverlay: { [weak self] in self?.overlay.hide() },
+        suppressWrite: { [weak self] fingerprint, date in
+            self?.monitor?.suppressNextWrite(fingerprint: fingerprint, until: date)
+        }
+    )
 
     init(settings: AppSettings? = nil, shortcutManager: ShortcutManager = ShortcutManager()) {
         self.shortcutManager = shortcutManager
@@ -149,18 +159,12 @@ final class AppModel {
     }
 
     private func paste(_ item: ClipboardItem, plainText: Bool) {
-        let coordinator = PasteCoordinator(
-            pasteboard: SystemPasteboardWriter(),
-            accessibility: SystemAccessibilityClient(),
-            closeOverlay: { [weak self] in self?.overlay.hide() },
-            suppressWrite: { [weak self] fingerprint, date in
-                self?.monitor?.suppressNextWrite(fingerprint: fingerprint, until: date)
-            }
-        )
         let mode: PasteMode = settings.defaultPasteBehavior == .automatic
             ? .automatic(plainText: plainText || settings.defaultPlainText)
             : .copyOnly(plainText: plainText || settings.defaultPlainText)
-        let result = coordinator.paste(item: item, mode: mode, target: pasteTarget)
+        let result = pasteCoordinator.paste(item: item, mode: mode, target: pasteTarget)
+        Logger(subsystem: "com.chujianyun.wpaste", category: "Paste")
+            .notice("Paste result: \(String(describing: result), privacy: .public)")
         if settings.soundEnabled, result == .pasted || result == .copied {
             NSSound(named: "Tink")?.play()
         }

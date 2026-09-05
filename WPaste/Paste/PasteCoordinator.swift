@@ -71,6 +71,7 @@ final class PasteCoordinator {
     private let accessibility: AccessibilityControlling
     private let closeOverlay: () -> Void
     private let suppressWrite: (String, Date) -> Void
+    private var hasRequestedAccessibilityPermission = false
 
     init(
         pasteboard: PasteboardWriting,
@@ -90,7 +91,10 @@ final class PasteCoordinator {
         closeOverlay()
         guard case .automatic = mode else { return .copied }
         guard accessibility.isTrusted else {
-            accessibility.requestPermission()
+            if !hasRequestedAccessibilityPermission {
+                hasRequestedAccessibilityPermission = true
+                accessibility.requestPermission()
+            }
             return .copiedOnly(.accessibilityPermissionMissing)
         }
         guard let target, target.isRunning else { return .copiedOnly(.targetUnavailable) }
