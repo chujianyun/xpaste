@@ -6,7 +6,10 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: 7PXD675DGC
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: DC86852A3142B093C0D6EF89F9978BC63349E0AF
+    CODE_SIGNING_ALLOWED: YES
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
 configFiles:
@@ -25,7 +28,6 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
-        CODE_SIGNING_ALLOWED: NO
   WPasteTests:
     type: bundle.unit-test
     platform: macOS
@@ -36,7 +38,6 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
-        CODE_SIGNING_ALLOWED: NO
 schemes:
   WPaste:
     build:

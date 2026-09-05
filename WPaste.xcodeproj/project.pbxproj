@@ -52,6 +52,7 @@
 		D1100E9C7FF0874A9122445E /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF3DFC6B0399EC9738C435D /* Models.swift */; };
 		D53BE621485485E564E65E31 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 77538F85044C5DA6DA36C042 /* Assets.xcassets */; };
 		DC232CFEADE9CA5C32B451EF /* PasteboardClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADF9E6FD6BDBC0D85ABC2BB1 /* PasteboardClient.swift */; };
+		DCE04F650B457C455F6D004E /* CodeSigningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19C02F0B7E485CE840751A /* CodeSigningTests.swift */; };
 		E0AA8D91B59F14A8CC27D7D0 /* RetentionCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA6BF51261BF0F25082BA37 /* RetentionCleaner.swift */; };
 		E1B8483C05D5D22DE5A3BF23 /* ClipboardLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE932315FE8260E6E5F044E5 /* ClipboardLifecycleTests.swift */; };
 		E4729BF4D3AFF69941E8013E /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AD33BB933A03CAA31B4B96 /* OverlayWindowController.swift */; };
@@ -126,6 +127,7 @@
 		EFF3DFC6B0399EC9738C435D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		F2B361885135DF8243C37EFC /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
 		F97DB7A4603C3CA3FB3E5D96 /* ClipboardParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardParserTests.swift; sourceTree = "<group>"; };
+		FA19C02F0B7E485CE840751A /* CodeSigningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeSigningTests.swift; sourceTree = "<group>"; };
 		FDF9294C4941A5F8AD778FC2 /* SettingsPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPersistence.swift; sourceTree = "<group>"; };
 		FE01972DE5CA8881EE220F03 /* ShortcutManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -152,6 +154,7 @@
 			children = (
 				716FEBB912D8F47942BC26E4 /* AppIconTests.swift */,
 				EE932315FE8260E6E5F044E5 /* ClipboardLifecycleTests.swift */,
+				FA19C02F0B7E485CE840751A /* CodeSigningTests.swift */,
 			);
 			path = Integration;
 			sourceTree = "<group>";
@@ -466,10 +469,12 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					2138E2E4A7D3E28908DB431F = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = 7PXD675DGC;
+						ProvisioningStyle = Manual;
 					};
 					B7B217468EE987B9FEAC6ED9 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = 7PXD675DGC;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -558,6 +563,7 @@
 				E1B8483C05D5D22DE5A3BF23 /* ClipboardLifecycleTests.swift in Sources */,
 				5E566EC81D7FC3CBE60DE88B /* ClipboardMonitorTests.swift in Sources */,
 				3F5993BAD659D0FF68981CC4 /* ClipboardParserTests.swift in Sources */,
+				DCE04F650B457C455F6D004E /* CodeSigningTests.swift in Sources */,
 				7C7F7CE90AAC55CA3355DF5B /* FeatureStoreTests.swift in Sources */,
 				71120242D7BC5F8B6450BDF1 /* HistoryRepositoryTests.swift in Sources */,
 				996D5965403F07087A46832B /* ImageFileStoreTests.swift in Sources */,
@@ -615,10 +621,13 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGN_IDENTITY = DC86852A3142B093C0D6EF89F9978BC63349E0AF;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7PXD675DGC;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -673,10 +682,13 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGN_IDENTITY = DC86852A3142B093C0D6EF89F9978BC63349E0AF;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7PXD675DGC;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -708,7 +720,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -726,7 +737,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -744,7 +754,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -762,7 +771,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
