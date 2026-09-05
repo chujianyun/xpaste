@@ -1,5 +1,7 @@
 # WPaste 0.1 Release Checklist
 
+2026-09-05：0.1.0 完整测试通过（51 项测试，含参数化用例共 53 次执行；0 失败、0 跳过）。通用版及 arm64 / x86_64 Release archive 已生成，三个 DMG 均校验通过。本次通用 archive 已安装到 `/Applications/WPaste.app` 并在 Apple 芯片 Mac 上启动。Intel 实机运行、Developer ID 分发签名、公证及下列手工验收仍待完成。详见 [0.1.0 发布说明](releases/v0.1.0.md)。
+
 ## Automated checks
 
 - [x] Regenerate `WPaste.xcodeproj` from `project.yml`.
