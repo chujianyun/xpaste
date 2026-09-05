@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import WPaste
 
@@ -18,6 +19,53 @@ struct FeatureStoreTests {
         #expect(store.filteredItems.map(\.fingerprint) == ["file"])
         store.query = "safari"
         #expect(store.filteredItems.count == 3)
+    }
+
+    @Test func searchClearButtonClearsQueryAndRestoresHistory() throws {
+        let repository = try HistoryRepository.inMemory()
+        _ = try repository.upsert(payload: .text("季度计划"), fingerprint: "plan", source: source)
+        _ = try repository.upsert(payload: .text("会议记录"), fingerprint: "notes", source: source)
+        let history = HistoryStore(repository: repository)
+        try history.reload()
+        let view = NSHostingView(rootView: HistoryOverlayView(
+            history: history,
+            pinboards: PinboardStore(repository: repository),
+            onPaste: { _, _ in },
+            onClose: {}
+        ))
+        view.frame = NSRect(x: 0, y: 0, width: 900, height: 320)
+        let window = NSWindow(contentRect: view.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView = view
+        window.orderFront(nil)
+        defer { window.orderOut(nil); window.contentView = nil }
+
+        func searchField(in view: NSView) -> NSSearchField? {
+            if let field = view as? NSSearchField { return field }
+            return view.subviews.lazy.compactMap { searchField(in: $0) }.first
+        }
+        view.layoutSubtreeIfNeeded()
+        let field = try #require(searchField(in: view))
+        let cell = try #require(field.cell as? NSSearchFieldCell)
+        #expect(field.stringValue.isEmpty)
+
+        field.stringValue = "季度"
+        field.delegate?.controlTextDidChange?(Notification(name: NSControl.textDidChangeNotification, object: field))
+        #expect(history.query == "季度")
+        #expect(history.filteredItems.map(\.fingerprint) == ["plan"])
+
+        for query in ["季度", "   "] {
+            history.query = query
+            RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
+            #expect(field.stringValue == query)
+            #expect(history.filteredItems.count < 2)
+            let cancelRect = cell.cancelButtonRect(forBounds: field.bounds)
+            #expect(!cancelRect.isEmpty)
+            let button = try #require(cell.cancelButtonCell)
+            button.performClick(field)
+            #expect(history.query.isEmpty)
+            #expect(history.filteredItems.count == 2)
+            #expect(field.stringValue.isEmpty)
+        }
     }
 
     @Test func itemCanBelongToMultiplePinboardsAndDeletingBoardKeepsHistory() throws {

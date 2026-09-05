@@ -83,8 +83,7 @@ struct HistoryOverlayView: View {
 
     private var navigationBar: some View {
         HStack(spacing: 14) {
-            TextField("搜索", text: $history.query)
-                .textFieldStyle(.roundedBorder)
+            HistorySearchField(text: $history.query)
                 .focused($searchFocused)
                 .frame(width: 220)
             boardButton(title: "剪贴板历史", id: nil)
@@ -149,5 +148,43 @@ struct HistoryOverlayView: View {
     private func pasteSelection(plainText: Bool) {
         guard let index = navigation.selectedIndex, displayedItems.indices.contains(index) else { return }
         onPaste(displayedItems[index], plainText)
+    }
+}
+
+private struct HistorySearchField: NSViewRepresentable {
+    @Binding var text: String
+
+    func makeNSView(context: Context) -> NSSearchField {
+        let field = NSSearchField()
+        field.placeholderString = "搜索"
+        field.setAccessibilityLabel("搜索")
+        field.sendsSearchStringImmediately = true
+        field.delegate = context.coordinator
+        field.target = context.coordinator
+        field.action = #selector(Coordinator.searchChanged(_:))
+        return field
+    }
+
+    func updateNSView(_ field: NSSearchField, context: Context) {
+        context.coordinator.text = $text
+        if field.stringValue != text { field.stringValue = text }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(text: $text) }
+
+    @MainActor
+    final class Coordinator: NSObject, NSSearchFieldDelegate {
+        var text: Binding<String>
+
+        init(text: Binding<String>) { self.text = text }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSSearchField else { return }
+            searchChanged(field)
+        }
+
+        @objc func searchChanged(_ field: NSSearchField) {
+            text.wrappedValue = field.stringValue
+        }
     }
 }
