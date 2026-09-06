@@ -1,0 +1,2 @@
+3ec7c3a8f176df4331bcb9baf20a1c68652242d5fb0ed4fa7ea20d6a9ad7b1f0  WPaste-0.1.1-macOS-arm64.dmg
+17af3595e7c21efec41d4c941e5fe1b5a875e41431aa24fdd2d96ff48b4b9c37  WPaste-0.1.1-macOS-x86_64.dmg

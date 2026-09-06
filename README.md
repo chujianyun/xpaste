@@ -27,7 +27,7 @@
 
 当前版本使用 Apple Development 开发证书签名，**尚未使用 Developer ID 分发签名，也未完成 Apple 公证**。首次打开可能被 macOS 拦截；确认来自本仓库的 Release 后，可在「系统设置 → 隐私与安全性」中使用「仍要打开」。受组织管理的 Mac 可能无法放行。
 
-每个 Release 同时提供 [SHA256SUMS.txt](https://github.com/chujianyun/xpaste/releases/download/v0.1.1/SHA256SUMS.txt)，可将其与两个 DMG 放在同一目录后校验：
+仓库提供本版本的 [SHA256SUMS.txt](https://raw.githubusercontent.com/chujianyun/xpaste/main/docs/releases/v0.1.1/SHA256SUMS.txt)，可将其与两个 DMG 放在同一目录后校验：
 
 ```bash
 shasum -a 256 -c SHA256SUMS.txt
