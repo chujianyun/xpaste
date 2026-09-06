@@ -6,12 +6,12 @@
 
 ## 下载与安装
 
-前往 **[GitHub Releases](https://github.com/chujianyun/xpaste/releases/latest)** 下载适合你 Mac 的安装包。
+当前版本为 **0.1.1**，可直接下载适合你 Mac 的安装包，或前往 **[GitHub Releases](https://github.com/chujianyun/xpaste/releases/latest)** 查看发布详情。
 
 | 你的 Mac | 安装包 |
 | --- | --- |
-| Apple 芯片（M 系列） | `WPaste-0.1.0-macOS-arm64.dmg` |
-| Intel 处理器 | `WPaste-0.1.0-macOS-x86_64.dmg` |
+| Apple 芯片（M 系列） | [WPaste-0.1.1-macOS-arm64.dmg](https://github.com/chujianyun/xpaste/releases/download/v0.1.1/WPaste-0.1.1-macOS-arm64.dmg) |
+| Intel 处理器 | [WPaste-0.1.1-macOS-x86_64.dmg](https://github.com/chujianyun/xpaste/releases/download/v0.1.1/WPaste-0.1.1-macOS-x86_64.dmg) |
 
 **系统要求：macOS 15.0 或更高版本。** 在苹果菜单 →「关于本机」中查看芯片或处理器类型。
 
@@ -21,11 +21,18 @@
 
 当前版本使用 Apple Development 开发证书签名，**尚未使用 Developer ID 分发签名，也未完成 Apple 公证**。首次打开可能被 macOS 拦截；确认来自本仓库的 Release 后，可在「系统设置 → 隐私与安全性」中使用「仍要打开」。受组织管理的 Mac 可能无法放行。
 
-每个 Release 同时提供 `SHA256SUMS.txt`，可将其与两个 DMG 放在同一目录后校验：
+每个 Release 同时提供 [SHA256SUMS.txt](https://github.com/chujianyun/xpaste/releases/download/v0.1.1/SHA256SUMS.txt)，可将其与两个 DMG 放在同一目录后校验：
 
 ```bash
 shasum -a 256 -c SHA256SUMS.txt
 ```
+
+## 0.1.1 更新
+
+- 修复打开历史面板后，原应用引用可能提前释放、导致自动粘贴失败的问题。
+- 修复未授予辅助功能权限时反复弹出授权提示的问题；同次运行只提示一次，仍可复制历史内容，授权后再次粘贴即可恢复自动粘贴。
+
+完整说明见 [0.1.1 发布说明](docs/releases/v0.1.1.md)。
 
 ## 能做什么
 
@@ -87,7 +94,9 @@ Scripts/package-dmg.sh
 hdiutil verify build/WPaste.dmg
 ```
 
-脚本先运行完整测试，再生成 `build/WPaste.xcarchive` 和 `build/WPaste.dmg`。更多验收项目见 [发布检查清单](docs/release-checklist.md)。
+脚本先运行完整测试，再生成通用版 `build/WPaste.xcarchive` 和 `build/WPaste.dmg`。
+
+发布两个芯片版本时，在测试通过后分别使用 `ARCHS=arm64`、`ARCHS=x86_64` 和 `ONLY_ACTIVE_ARCH=NO` 归档到独立路径。每个 DMG 放入对应归档的 `WPaste.app`，并附上指向 `/Applications` 的 `Applications` 快捷链接，方便拖拽安装。逐一检查二进制架构、签名和 DMG 校验，再为两个 DMG 生成 `SHA256SUMS.txt`。更多验收项目见 [发布检查清单](docs/release-checklist.md)。
 
 ## 作者：悟鸣
 
