@@ -4,6 +4,12 @@
 
 使用 Swift 6、SwiftUI、AppKit 和 SwiftData 构建，常驻菜单栏。按下 **⌘⇧V** 打开剪贴板历史，再按一次收起。
 
+## 使用效果预览
+
+![WPaste 剪贴板历史面板，展示搜索框以及图片、文本和文件记录卡片](docs/assets/wpaste-preview.png)
+
+在同一面板中浏览图片、文本和文件记录，查看来源应用，并通过顶部搜索框快速查找内容。
+
 ## 下载与安装
 
 当前版本为 **0.1.1**，可直接下载适合你 Mac 的安装包，或前往 **[GitHub Releases](https://github.com/chujianyun/xpaste/releases/latest)** 查看发布详情。
